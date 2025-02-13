@@ -10,7 +10,8 @@ export class FacebookService extends PassportStrategy(Strategy, 'facebook') {
       // clientSecret: process.env.APP_SECRET,
       clientID: '965963985109554',
       clientSecret: '5c85a390c20d1db5776fff732aa24797',
-      callbackURL: 'https://d519-41-111-77-95.ngrok-free.app/facebook/redirect',
+      callbackURL:
+        'https://0c94-41-111-87-175.ngrok-free.app/facebook/redirect',
       scope: 'email',
       profileFields: ['emails', 'name'],
     });
