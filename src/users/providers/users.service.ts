@@ -3,6 +3,11 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class UsersService {
   public findUserById(id: number) {
-    return `hi user ${id}`;
+    return {
+      id,
+      firstName: 'ferhat',
+      lastName: 'tahar',
+      email: 'ferhattahar@gmail.com',
+    };
   }
 }
