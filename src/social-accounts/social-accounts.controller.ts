@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CreateSocialAccountDto } from './dtos/createSocialAccount.dto';
 import { GetSocialAccountsDto } from './dtos/getParamsSocialAccounts.dto';
-import { SocialAccountsService } from './providers/providers/social-accounts.service';
+import { SocialAccountsService } from './providers/social-accounts.service';
 
 @Controller('social-accounts')
 export class SocialAccountsController {
@@ -17,7 +17,7 @@ export class SocialAccountsController {
     return 'social account created';
   }
 
-  @Get('/:userId?')
+  @Get()
   public findAll(@Param() getSocialAccountsDto: GetSocialAccountsDto) {
     console.log(getSocialAccountsDto);
     return this.socialAccountsService.findAll(getSocialAccountsDto.userId);
