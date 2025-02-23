@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 
 @Entity()
-export class DeliveryPlatform {
+export class Delivery {
   @PrimaryGeneratedColumn()
   id: number;
 

@@ -9,6 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from '../users/user.entity';
+import { OrderStatus } from './enums/orderStatus.enum';
 
 @Entity()
 export class Order {
@@ -25,10 +26,9 @@ export class Order {
   address: string;
 
   @Column({
-    type: 'varchar',
-    // type: 'enum',
-    // enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'],
-    // default: 'pending',
+    type: 'enum',
+    enum: OrderStatus,
+    default: OrderStatus.PENDING,
   })
   status: string;
 

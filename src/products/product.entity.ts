@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ProductSize } from './enums/productSize';
 
 @Entity()
 export class Product {
@@ -29,7 +30,12 @@ export class Product {
   @Column({ type: 'varchar', length: 255, nullable: true })
   color?: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({
+    type: 'enum',
+    enum: ProductSize,
+    default: ProductSize.SMALL,
+    nullable: true,
+  })
   size?: string;
 
   @Column({
@@ -56,7 +62,7 @@ export class Product {
   @Column({ type: 'float', nullable: false })
   totalProductsSold: number;
 
-  @Column('text', { nullable: true, name: 'image_url' })
+  @Column({ type: 'text', nullable: true })
   imageUrl?: string;
 
   @CreateDateColumn()
