@@ -10,21 +10,14 @@ import {
 @Entity()
 export class Product {
   @PrimaryGeneratedColumn()
-  productId: number;
-
-  // If you decide to remove the social_page reference, you can omit this.
-  @Column({
-    type: 'int',
-    nullable: true,
-  })
-  socialPageId?: number;
+  id: number;
 
   @Column({
     type: 'varchar',
     length: 255,
     nullable: false,
   })
-  title: string;
+  productName: string;
 
   @Column({
     type: 'text',
@@ -41,9 +34,9 @@ export class Product {
 
   @Column({
     type: 'boolean',
-    nullable: false,
+    nullable: true,
   })
-  heavyWeight: boolean;
+  heavyWeight?: boolean;
 
   @Column({ type: 'float', nullable: false })
   price: number;
@@ -51,8 +44,8 @@ export class Product {
   @Column({ type: 'float', nullable: true })
   discount?: number;
 
-  @Column({ type: 'int', nullable: true })
-  quantity?: number;
+  @Column({ type: 'float', nullable: false })
+  quantity: number;
 
   @Column({
     type: 'boolean',
@@ -60,7 +53,7 @@ export class Product {
   })
   inStock: boolean;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'float', nullable: false })
   totalProductsSold: number;
 
   @Column('text', { nullable: true, name: 'image_url' })
@@ -73,5 +66,5 @@ export class Product {
   updatedAt: Date;
 
   @DeleteDateColumn()
-  deletedAt?: Date;
+  deletedAt: Date;
 }

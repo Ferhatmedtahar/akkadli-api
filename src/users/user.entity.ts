@@ -17,17 +17,18 @@ export class User {
     length: 128,
     nullable: false,
   })
-  firstName: number;
+  firstName: string;
   @Column({
     type: 'varchar',
     length: 128,
     nullable: false,
   })
-  lastName: number;
+  lastName: string;
   @Column({
     type: 'varchar',
     length: 128,
     nullable: false,
+    unique: true,
   })
   email: string;
 
@@ -35,6 +36,7 @@ export class User {
     type: 'varchar',
     length: 255,
     nullable: false,
+    unique: true,
   })
   googleId: string;
 
