@@ -1,4 +1,3 @@
-import { Address } from 'cluster';
 import { User } from 'src/users/user.entity';
 import {
   Column,
@@ -17,20 +16,20 @@ export class Setting {
     type: 'varchar',
   })
   city: string;
-  // @OneToOne(() => Address, (address) => address.setting, {
-  //     cascade: true,
-  //     eager: true,
-  //   })
-  //   defaultAddress: Address;
 
-  // @OneToMany(() => DeliveryPlatform, (platform) => platform.settings, {
-  //   cascade: true,
-  // })
-  // deliveryPlatforms: DeliveryPlatform[];
-
-  @OneToOne(() => User, (user) => user.setting, {
+  @OneToOne(() => User, (user) => user.settings, {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
   user: User;
 }
+// @OneToOne(() => Address, (address) => address.setting, {
+//     cascade: true,
+//     eager: true,
+//   })
+//   defaultAddress: Address;
+
+// @OneToMany(() => DeliveryPlatform, (platform) => platform.settings, {
+//   cascade: true,
+// })
+// deliveryPlatforms: DeliveryPlatform[];

@@ -1,11 +1,14 @@
+import { Type } from 'class-transformer';
 import {
   IsEmail,
+  IsJSON,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { CreateSettingDto } from 'src/settings/dtos/createSetting.dto';
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
@@ -26,4 +29,8 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   googleId: string;
+
+  @IsOptional()
+  @Type(() => CreateSettingDto)
+  settings?: CreateSettingDto;
 }

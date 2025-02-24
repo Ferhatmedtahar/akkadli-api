@@ -42,11 +42,11 @@ export class User {
   })
   googleId: string;
 
-  @OneToOne(() => Setting, (setting) => setting.user, {
+  @OneToOne(() => Setting, (settings) => settings.user, {
     cascade: true,
     eager: true,
   })
-  setting: Setting;
+  settings?: Setting;
 
   @CreateDateColumn()
   createDate: Date;

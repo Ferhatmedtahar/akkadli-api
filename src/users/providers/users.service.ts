@@ -28,6 +28,8 @@ export class UsersService {
   }
 
   public async createUser(@Body() createUserDto: CreateUserDto) {
+    console.log('from the service', createUserDto);
+    console.log(createUserDto.settings); //{"city":"Paris"}
     //check if user exists
     const userExists = await this.userRepository.findOneBy({
       email: createUserDto.email,
@@ -39,15 +41,9 @@ export class UsersService {
       };
     }
     // create user
-    const user = await this.userRepository.save(createUserDto);
-    // if not created throw an error
-    if (!user) {
-      return {
-        message: 'user not created',
-        error: true,
-      };
-    }
+    const user = this.userRepository.create(createUserDto);
 
-    return user;
+    return await this.userRepository.save(user);
+    // if not created throw an error
   }
 }
