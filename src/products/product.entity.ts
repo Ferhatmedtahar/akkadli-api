@@ -1,8 +1,11 @@
+import { Order } from 'src/orders/order.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -65,6 +68,22 @@ export class Product {
   @Column({ type: 'text', nullable: true })
   imageUrl?: string;
 
+  @ManyToMany(() => Order, (order) => order.products, {
+    eager: true,
+    onDelete: 'RESTRICT',
+  })
+  @JoinTable({
+    name: 'order_products',
+    joinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'order_id',
+      referencedColumnName: 'id',
+    },
+  })
+  orders: Order[];
   @CreateDateColumn()
   createdAt: Date;
 

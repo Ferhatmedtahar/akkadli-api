@@ -1,8 +1,11 @@
 POST http://localhost:3000/users
 Content-Type:application/json
 {
-  "email":"ferhatmedtahar@gmail.com",
+  "email":"ferhatmedtahar1@gmail.com",
   "firstName":"ferhat",
   "lastName":"tahar",
-  "googleId": "111352299504535320083"
+  "googleId": "111352299504535320081",
+  "setting":{
+    "city":"Paris",
+  }
 }

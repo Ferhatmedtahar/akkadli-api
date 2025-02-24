@@ -1,8 +1,10 @@
+import { Setting } from 'src/settings/setting.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -39,6 +41,12 @@ export class User {
     unique: true,
   })
   googleId: string;
+
+  @OneToOne(() => Setting, (setting) => setting.user, {
+    cascade: true,
+    eager: true,
+  })
+  setting: Setting;
 
   @CreateDateColumn()
   createDate: Date;
