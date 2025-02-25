@@ -1,12 +1,12 @@
-import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateAddressDto {
   @IsString()
   @IsNotEmpty()
   municipality: string;
-  @IsInt()
+  @IsString()
   @IsNotEmpty()
-  postalCode: number;
+  postalCode: string;
   @IsString()
   @IsNotEmpty()
   wilaya: string;

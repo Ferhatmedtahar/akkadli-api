@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { User } from 'src/users/user.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Delivery {
@@ -14,6 +15,6 @@ export class Delivery {
   @Column({ type: 'varchar', length: 255 })
   apiToken: string;
 
-  // @ManyToOne(() => Settings, (settings) => settings.deliveryPlatforms)
-  // settings: Settings;
+  @ManyToOne(() => User, (user) => user.deliveries, { eager: true })
+  user: User;
 }

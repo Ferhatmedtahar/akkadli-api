@@ -28,9 +28,11 @@ export class Address {
 
   //1000 , 48000 , 58000
   @Column({
-    type: 'int',
+    type: 'varchar',
+    length: 128,
+    nullable: false,
   })
-  postalCode: number;
+  postalCode: string;
 
   @OneToOne(() => User, (user) => user.address, {
     onDelete: 'CASCADE',

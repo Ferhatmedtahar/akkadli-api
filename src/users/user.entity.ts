@@ -1,10 +1,12 @@
 import { Address } from 'src/settings/addresses/address.entity';
+import { Delivery } from 'src/settings/deliveries/delivery.entity';
 
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -49,6 +51,8 @@ export class User {
   })
   address?: Address;
 
+  @OneToMany(() => Delivery, (delivery) => delivery.user)
+  deliveries: Delivery[];
   @CreateDateColumn()
   createDate: Date;
   @UpdateDateColumn()

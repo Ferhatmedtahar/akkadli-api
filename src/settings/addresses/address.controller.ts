@@ -1,5 +1,4 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
-import { GetAddressParamDto } from './dtos/getAddressParam.dto';
+import { Body, Controller, Get, Patch } from '@nestjs/common';
 import { PatchAddressDto } from './dtos/patchAddress.dto';
 import { AddressService } from './providers/address.service';
 
@@ -11,11 +10,14 @@ export class AddressController {
   ) {}
 
   @Get()
-  public async getAddressById(@Param() getAddressParamDto: GetAddressParamDto) {
-    return this.addressService.getAddressById(getAddressParamDto);
+  public async getAddressByUserId() {
+    return this.addressService.getAddressByUserId();
   }
   @Patch()
   public async updateAddress(@Body() patchAddressDto: PatchAddressDto) {
     return this.addressService.updateAddress(patchAddressDto);
   }
+  // public async getAddressById(@Param() getAddressParamDto: GetAddressParamDto) {
+  //   return this.addressService.getAddressById(getAddressParamDto);
+  // }
 }

@@ -6,6 +6,9 @@ import { Address } from '../address.entity';
 import { CreateAddressDto } from '../dtos/createAddress.dto';
 import { GetAddressParamDto } from '../dtos/getAddressParam.dto';
 import { PatchAddressDto } from '../dtos/patchAddress.dto';
+import { CreateAddressProvider } from './create-address.provider';
+import { GetAddressProvider } from './get-address.provider';
+import { PatchAddressProvider } from './patch-address.provider';
 
 @Injectable()
 export class AddressService {
@@ -15,25 +18,31 @@ export class AddressService {
     private readonly addressRepository: Repository<Address>,
     /**inject user service */
     private readonly usersService: UsersService,
+    /**inject create address Provider  */
+    private readonly createAddressProvider: CreateAddressProvider,
+    /**inject patch address Provider*/
+    private readonly patchAddressProvider: PatchAddressProvider,
+    /**inject get address Provider by user id  */
+    private readonly getAddressProvider: GetAddressProvider,
   ) {}
+  /**
+   * Get address by id
+   * @param getAddressParamDto
+   * @returns address
+   * no need to use it on the controller since we get the address by user id only
+   */
   public async getAddressById(@Param() getAddressParamDto: GetAddressParamDto) {
     return await this.addressRepository.findOneBy(getAddressParamDto);
   }
 
+  public async getAddressByUserId() {
+    return this.getAddressProvider.getAddressByUserId();
+  }
   public async createAddress(@Body() createAddressDto: CreateAddressDto) {
-    return await this.addressRepository.save(createAddressDto);
+    return this.createAddressProvider.createAddress(createAddressDto);
   }
 
   public async updateAddress(@Body() patchAddressDto: PatchAddressDto) {
-    //find the user using the user service and id from the auth token
-    const user = await this.usersService.findUserById(12);
-
-    //find the address using the user
-    const address = await this.addressRepository.findOneById(user.address.id);
-    address.wilaya = patchAddressDto.wilaya || address.wilaya;
-    address.municipality = patchAddressDto.municipality || address.municipality;
-    address.postalCode = patchAddressDto.postalCode || address.postalCode;
-
-    return await this.addressRepository.save(address);
+    return this.patchAddressProvider.updateAddress(patchAddressDto);
   }
 }

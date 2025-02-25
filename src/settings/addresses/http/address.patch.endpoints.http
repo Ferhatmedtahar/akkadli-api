@@ -1,0 +1,7 @@
+PATCH http://localhost:3000/settings/address
+Content-Type: application/json
+{
+"municipality":"Laghouat",
+"wilaya":"Laghouat",
+"postalCode":"03000"
+}
