@@ -1,8 +1,10 @@
 import { Body, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/providers/auth/auth.service';
+import { defaultAddress } from 'src/settings/addresses/constants/defaultAddress';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/createUser.dto';
+import { PatchUserDto } from '../dtos/patchUser.dto';
 import { User } from '../user.entity';
 
 @Injectable()
@@ -18,22 +20,23 @@ export class UsersService {
 
   public async findUserById(id: number) {
     const user = await this.userRepository.findOneBy({ id });
-    if (!user) {
-      return {
-        message: 'user not found',
-        error: true,
-      };
-    }
+    // if (!user) {
+    //   return {
+    //     message: 'user not found',
+    //     error: true,
+    //   };
+    // }
     return user;
   }
 
   public async createUser(@Body() createUserDto: CreateUserDto) {
     console.log('from the service', createUserDto);
-    console.log(createUserDto.settings); //{"city":"Paris"}
+    console.log(createUserDto.address);
     //check if user exists
     const userExists = await this.userRepository.findOneBy({
       email: createUserDto.email,
     });
+
     if (userExists) {
       return {
         message: 'user already exists',
@@ -41,9 +44,30 @@ export class UsersService {
       };
     }
     // create user
+    if (!createUserDto.address) {
+      createUserDto.address = defaultAddress;
+    }
+
     const user = this.userRepository.create(createUserDto);
 
-    return await this.userRepository.save(user);
     // if not created throw an error
+    return await this.userRepository.save(user);
+  }
+
+  public async delete(id: number) {
+    console.log(id);
+    //delete the post , no need to delete seperatly the settings first because cascade
+    await this.userRepository.delete(id);
+    return { deleted: true, id };
+  }
+
+  public async udpateUser(@Body() patchUserDto: PatchUserDto, id: number) {
+    console.log(patchUserDto);
+    const updates = {
+      firstName: patchUserDto.firstName,
+      lastName: patchUserDto.lastName,
+    };
+    const updated = await this.userRepository.update(id, updates);
+    return updated;
   }
 }

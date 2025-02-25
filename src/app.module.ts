@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AddressModule } from './addresses/address.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { DeliveriesModule } from './deliveries/deliveries.module';
+import { AddressModule } from './settings/addresses/address.module';
+import { DeliveriesModule } from './settings/deliveries/deliveries.module';
 import { OrdersModule } from './orders/orders.module';
 import { ProductsModule } from './products/products.module';
 import { SettingsModule } from './settings/settings.module';

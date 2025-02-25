@@ -1,4 +1,5 @@
-import { Setting } from 'src/settings/setting.entity';
+import { Address } from 'src/settings/addresses/address.entity';
+
 import {
   Column,
   CreateDateColumn,
@@ -42,11 +43,11 @@ export class User {
   })
   googleId: string;
 
-  @OneToOne(() => Setting, (settings) => settings.user, {
+  @OneToOne(() => Address, (address) => address.user, {
     cascade: true,
     eager: true,
   })
-  settings?: Setting;
+  address?: Address;
 
   @CreateDateColumn()
   createDate: Date;

@@ -42,13 +42,15 @@ export class UsersController {
   }
 
   @Patch('/:id')
-  public patchUsers(@Body() patchUserDto: PatchUserDto) {
-    console.log(patchUserDto);
-    return 'you sent a patch request to the users endpoint';
+  public patchUsers(
+    @Body() patchUserDto: PatchUserDto,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.usersService.udpateUser(patchUserDto, id);
   }
 
   @Delete('/:id')
-  public deleteUsers() {
-    return 'you sent a delete request to the users endpoint';
+  public deleteUsers(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.delete(id);
   }
 }
