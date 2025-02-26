@@ -115,29 +115,45 @@
 <text text-anchor="start" x="429.73" y="-15.4" font-family="Times-12" font-size="14.00"> &#160;Exports</text>
 <g id="clust1" class="cluster">
 <title>cluster_ProductsModule</title>
-<polygon fill="none" stroke="black" stroke-dasharray="1,5" points="158,-70 158,-195 338,-195 338,-70 158,-70"/>
+<polygon fill="none" stroke="black" stroke-dasharray="1,5" points="100,-70 100,-195 396,-195 396,-70 100,-70"/>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_ProductsModule_imports</title>
+<polygon fill="none" stroke="black" points="280,-78 280,-130 388,-130 388,-78 280,-78"/>
 </g>
 <g id="clust6" class="cluster">
 <title>cluster_ProductsModule_providers</title>
-<polygon fill="none" stroke="black" points="166,-78 166,-130 330,-130 330,-78 166,-78"/>
+<polygon fill="none" stroke="black" points="108,-78 108,-130 272,-130 272,-78 108,-78"/>
 </g>
-<!-- ProductsService -->
+<!-- UsersModule -->
 <g id="node1" class="node">
-<title>ProductsService</title>
-<ellipse fill="#fdb462" stroke="black" cx="248" cy="-104" rx="73.57" ry="18"/>
-<text text-anchor="middle" x="248" y="-99.8" font-family="Times,serif" font-size="14.00">ProductsService</text>
+<title>UsersModule</title>
+<polygon fill="#8dd3c7" stroke="black" points="379.92,-122 376.92,-126 355.92,-126 352.92,-122 288.08,-122 288.08,-86 379.92,-86 379.92,-122"/>
+<text text-anchor="middle" x="334" y="-99.8" font-family="Times,serif" font-size="14.00">UsersModule</text>
 </g>
 <!-- ProductsModule -->
 <g id="node2" class="node">
 <title>ProductsModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="302.04,-187 299.04,-191 278.04,-191 275.04,-187 193.96,-187 193.96,-151 302.04,-151 302.04,-187"/>
-<text text-anchor="middle" x="248" y="-164.8" font-family="Times,serif" font-size="14.00">ProductsModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="316.04,-187 313.04,-191 292.04,-191 289.04,-187 207.96,-187 207.96,-151 316.04,-151 316.04,-187"/>
+<text text-anchor="middle" x="262" y="-164.8" font-family="Times,serif" font-size="14.00">ProductsModule</text>
+</g>
+<!-- UsersModule&#45;&gt;ProductsModule -->
+<g id="edge1" class="edge">
+<title>UsersModule&#45;&gt;ProductsModule</title>
+<path fill="none" stroke="black" d="M302.28,-122.11C302.28,-122.11 302.28,-140.99 302.28,-140.99"/>
+<polygon fill="black" stroke="black" points="298.78,-140.99 302.28,-150.99 305.78,-140.99 298.78,-140.99"/>
+</g>
+<!-- ProductsService -->
+<g id="node3" class="node">
+<title>ProductsService</title>
+<ellipse fill="#fdb462" stroke="black" cx="190" cy="-104" rx="73.57" ry="18"/>
+<text text-anchor="middle" x="190" y="-99.8" font-family="Times,serif" font-size="14.00">ProductsService</text>
 </g>
 <!-- ProductsService&#45;&gt;ProductsModule -->
-<g id="edge1" class="edge">
+<g id="edge2" class="edge">
 <title>ProductsService&#45;&gt;ProductsModule</title>
-<path fill="none" stroke="black" d="M248,-122.11C248,-122.11 248,-140.99 248,-140.99"/>
-<polygon fill="black" stroke="black" points="244.5,-140.99 248,-150.99 251.5,-140.99 244.5,-140.99"/>
+<path fill="none" stroke="black" d="M235.76,-118.43C235.76,-118.43 235.76,-140.89 235.76,-140.89"/>
+<polygon fill="black" stroke="black" points="232.26,-140.89 235.76,-150.89 239.26,-140.89 232.26,-140.89"/>
 </g>
 </g>
 </svg>
@@ -203,6 +219,16 @@
                         </li>
                     </ul>
                 </div>
+                <div class="col-sm-3">
+                    <h3>Imports<a href="https://angular.io/api/core/NgModule#imports" target="_blank" rel="noopener noreferrer"
+                            title="Official documentation about module imports"><span
+                                class="icon ion-ios-information-circle-outline"></a></h3>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <a href="../modules/UsersModule.html">UsersModule</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -212,12 +238,16 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Module } from &#x27;@nestjs/common&#x27;;
+import { TypeOrmModule } from &#x27;@nestjs/typeorm&#x27;;
+import { Product } from &#x27;./product.entity&#x27;;
 import { ProductsController } from &#x27;./products.controller&#x27;;
 import { ProductsService } from &#x27;./providers/products.service&#x27;;
+import { UsersModule } from &#x27;src/users/users.module&#x27;;
 
 @Module({
   controllers: [ProductsController],
-  providers: [ProductsService]
+  providers: [ProductsService],
+  imports: [TypeOrmModule.forFeature([Product]), UsersModule],
 })
 export class ProductsModule {}
 </code></pre>

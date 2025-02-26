@@ -1,0 +1,4 @@
+PATCH http://localhost:3000/settings/deliveries/1
+Content-Type:application/json
+{
+}

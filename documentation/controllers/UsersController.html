@@ -150,10 +150,20 @@
                             </li>
                             <li>
                                     <span class="modifier"></span>
+                                    <span class="modifier">Public</span>
+                                <a href="#deleteUsers" >deleteUsers</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Public</span>
                                 <a href="#getUserById" >getUserById</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Public</span>
+                                <a href="#patchUsers" >patchUsers</a>
                             </li>
                         </ul>
                     </td>
@@ -205,8 +215,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="37"
-                                    class="link-to-prism">src/users/users.controller.ts:37</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="40"
+                                    class="link-to-prism">src/users/users.controller.ts:40</a></div>
                         </td>
                     </tr>
 
@@ -242,7 +252,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
 
                         </div>
                             <div class="io-description">
@@ -256,21 +266,19 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getUserById"></a>
+                    <a name="deleteUsers"></a>
                     <span class="name">
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Public</span>
-                        <span ><b>getUserById</b></span>
-                        <a href="#getUserById"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>deleteUsers</b></span>
+                        <a href="#deleteUsers"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getUserById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>deleteUsers(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
@@ -278,14 +286,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;/:id&#x27;)<br />@ApiOperation({summary: &#x27;get user by id&#x27;})<br />@ApiProperty({description: &#x27;id of the user&#x27;, example: 1})<br /></code>
+                    <code>@Delete(&#x27;/:id&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="30"
-                                    class="link-to-prism">src/users/users.controller.ts:30</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="53"
+                                    class="link-to-prism">src/users/users.controller.ts:53</a></div>
                         </td>
                     </tr>
 
@@ -331,6 +339,174 @@
             </tr>
         </tbody>
     </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getUserById"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Public</span>
+                        <span ><b>getUserById</b></span>
+                        <a href="#getUserById"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getUserById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Get(&#x27;/:id&#x27;)<br />@ApiOperation({summary: &#x27;get user by id&#x27;})<br />@ApiProperty({description: &#x27;id of the user&#x27;, example: 1})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="33"
+                                    class="link-to-prism">src/users/users.controller.ts:33</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>id</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="patchUsers"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier">Public</span>
+                        <span ><b>patchUsers</b></span>
+                        <a href="#patchUsers"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>patchUsers(patchUserDto: <a href="../classes/PatchUserDto.html" target="_self">PatchUserDto</a>, id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Patch(&#x27;/:id&#x27;)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="45"
+                                    class="link-to-prism">src/users/users.controller.ts:45</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>patchUserDto</td>
+                                            <td>
+                                                            <code><a href="../classes/PatchUserDto.html" target="_self" >PatchUserDto</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>id</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </section>    </div>
 
 
@@ -338,13 +514,13 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
 } from &#x27;@nestjs/common&#x27;;
-import { CreateUserDto } from &#x27;./dtos/createUser.dto&#x27;;
-import { UsersService } from &#x27;./providers/users.service&#x27;;
 import {
   ApiBody,
   ApiOperation,
@@ -352,6 +528,9 @@ import {
   ApiResponse,
   ApiTags,
 } from &#x27;@nestjs/swagger&#x27;;
+import { CreateUserDto } from &#x27;./dtos/createUser.dto&#x27;;
+import { PatchUserDto } from &#x27;./dtos/patchUser.dto&#x27;;
+import { UsersService } from &#x27;./providers/users.service&#x27;;
 
 @Controller(&#x27;users&#x27;)
 @ApiTags(&#x27;Users&#x27;)
@@ -372,8 +551,20 @@ export class UsersController {
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: &#x27;user created&#x27; })
   public createUser(@Body() createUserDto: CreateUserDto) {
-    console.log(createUserDto);
-    return &#x27;user created&#x27;;
+    return this.usersService.createUser(createUserDto);
+  }
+
+  @Patch(&#x27;/:id&#x27;)
+  public patchUsers(
+    @Body() patchUserDto: PatchUserDto,
+    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
+  ) {
+    return this.usersService.udpateUser(patchUserDto, id);
+  }
+
+  @Delete(&#x27;/:id&#x27;)
+  public deleteUsers(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
+    return this.usersService.delete(id);
   }
 }
 </code></pre>

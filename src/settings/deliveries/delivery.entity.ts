@@ -15,6 +15,6 @@ export class Delivery {
   @Column({ type: 'varchar', length: 255 })
   apiToken: string;
 
-  @ManyToOne(() => User, (user) => user.deliveries, { eager: true })
+  @ManyToOne(() => User, (user) => user.deliveries)
   user: User;
 }

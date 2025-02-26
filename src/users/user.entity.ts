@@ -53,10 +53,13 @@ export class User {
 
   @OneToMany(() => Delivery, (delivery) => delivery.user)
   deliveries: Delivery[];
+
   @CreateDateColumn()
   createDate: Date;
+
   @UpdateDateColumn()
   updateDate: Date;
+
   @DeleteDateColumn()
   deletedAt: Date;
 }

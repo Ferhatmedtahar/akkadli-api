@@ -19,14 +19,10 @@ export class UsersService {
   ) {}
 
   public async findUserById(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
-    // if (!user) {
-    //   return {
-    //     message: 'user not found',
-    //     error: true,
-    //   };
-    // }
-    return user;
+    return await this.userRepository.findOne({
+      where: { id },
+      relations: { deliveries: true },
+    });
   }
 
   public async createUser(@Body() createUserDto: CreateUserDto) {
