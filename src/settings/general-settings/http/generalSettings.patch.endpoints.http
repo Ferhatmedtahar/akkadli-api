@@ -1,0 +1,7 @@
+PATCH http://localhost:3000/settings/general-settings
+Content-Type: application/json
+{
+"phoneNumber":"+213550123456",
+"businessName":"My Business Name",
+"businessDescription":"My Business Description testing 123"
+}

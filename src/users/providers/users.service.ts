@@ -1,7 +1,8 @@
 import { Body, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/providers/auth/auth.service';
-import { defaultAddress } from 'src/settings/addresses/constants/defaultAddress';
+import { defaultAddress } from 'src/settings/addresses/constants/defaultAddress.const';
+import { defaultGeneralSettings } from 'src/settings/general-settings/constants/defaultGeneralSettings.const';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/createUser.dto';
 import { PatchUserDto } from '../dtos/patchUser.dto';
@@ -26,8 +27,8 @@ export class UsersService {
   }
 
   public async createUser(@Body() createUserDto: CreateUserDto) {
-    console.log('from the service', createUserDto);
-    console.log(createUserDto.address);
+    console.log('from the body', createUserDto);
+
     //check if user exists
     const userExists = await this.userRepository.findOneBy({
       email: createUserDto.email,
@@ -39,13 +40,19 @@ export class UsersService {
         error: true,
       };
     }
-    // create user
+    //alter the dto if there are no address or general settings we use the default ones
     if (!createUserDto.address) {
       createUserDto.address = defaultAddress;
     }
 
+    if (!createUserDto.generalSettings) {
+      createUserDto.generalSettings = defaultGeneralSettings;
+    }
+
+    // create user
     const user = this.userRepository.create(createUserDto);
 
+    console.log(user);
     // if not created throw an error
     return await this.userRepository.save(user);
   }

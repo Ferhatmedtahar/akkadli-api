@@ -8,6 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { CreateAddressDto } from 'src/settings/addresses/dtos/createAddress.dto';
+import { CreateGeneralSettingsDto } from 'src/settings/general-settings/dtos/createGeneralSettings.dto';
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
@@ -32,4 +33,8 @@ export class CreateUserDto {
   @IsOptional()
   @Type(() => CreateAddressDto)
   address?: CreateAddressDto;
+
+  @IsOptional()
+  @Type(() => CreateGeneralSettingsDto)
+  generalSettings?: CreateGeneralSettingsDto;
 }

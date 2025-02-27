@@ -1,8 +1,8 @@
 POST http://localhost:3000/users
 Content-Type:application/json
 {
-  "email":"ferhatmedtahar11@gmail.com",
+  "email":"ferhatmedtahar12@gmail.com",
   "firstName":"ferhat",
   "lastName":"tahar",
-  "googleId": "111352299504535320011"
+  "googleId": "111352299504535320012"
 }

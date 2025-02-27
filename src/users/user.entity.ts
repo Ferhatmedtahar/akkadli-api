@@ -1,5 +1,6 @@
 import { Address } from 'src/settings/addresses/address.entity';
 import { Delivery } from 'src/settings/deliveries/delivery.entity';
+import { GeneralSettings } from 'src/settings/general-settings/general-settings.entity';
 
 import {
   Column,
@@ -50,6 +51,12 @@ export class User {
     eager: true,
   })
   address?: Address;
+
+  @OneToOne(() => GeneralSettings, (generalSettings) => generalSettings.user, {
+    cascade: true,
+    eager: true,
+  })
+  generalSettings?: GeneralSettings;
 
   @OneToMany(() => Delivery, (delivery) => delivery.user)
   deliveries: Delivery[];
