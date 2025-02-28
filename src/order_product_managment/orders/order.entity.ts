@@ -1,17 +1,14 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
   DeleteDateColumn,
-  ManyToOne,
+  Entity,
   OneToMany,
-  ManyToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../users/user.entity';
+import { OrderProduct } from '../order-product/order-product.entity';
 import { OrderStatus } from './enums/orderStatus.enum';
-import { Product } from 'src/products/product.entity';
 
 @Entity()
 export class Order {
@@ -40,10 +37,11 @@ export class Order {
   @Column({ type: 'varchar', length: 255, nullable: true })
   externalTrackingId?: string;
 
-  @ManyToMany(() => Product, (product) => product.orders, {
-    onDelete: 'RESTRICT',
+  @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.order, {
+    cascade: true,
   })
-  products: Product[];
+  orderProducts: OrderProduct[];
+
   @CreateDateColumn()
   createdAt: Date;
 

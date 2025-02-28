@@ -1,0 +1,29 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreateOrderProviderDto } from '../dtos/createOrderProductProvider.dto';
+import { OrderProduct } from '../order-product.entity';
+
+@Injectable()
+export class OrderProductService {
+  constructor(
+    /**inject order product repository */
+    @InjectRepository(OrderProduct)
+    private orderProductRepository: Repository<OrderProduct>,
+  ) {}
+
+  public async createOrderProductProvider(
+    createOrderProviderDto: CreateOrderProviderDto,
+  ) {
+    return this.orderProductRepository.create({
+      order: createOrderProviderDto.order, // Explicitly set the saved Order
+      product: createOrderProviderDto.product, // Explicitly set the Product entity
+      quantity: createOrderProviderDto.quantity,
+      priceAtPurchase: createOrderProviderDto.priceAtPurchase,
+    });
+  }
+
+  public async saveOrderProduct(orderProducts: OrderProduct[]) {
+    return await this.orderProductRepository.save(orderProducts);
+  }
+}

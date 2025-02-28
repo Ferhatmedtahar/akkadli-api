@@ -1,0 +1,22 @@
+POST http://localhost:3000/orders
+Content-Type:application/json
+{
+  "customerName": "John Doe",
+  "phoneNumber": "0123456789",
+  "address": "123 Street, City, State",
+  "status": "PENDING",
+  "isExternal": false,
+  "externalTrackingId": "",
+  "products": [
+    {
+      "productId": 1,
+      "quantity": 2,
+      "priceAtPurchase": 10.99
+    },
+    {
+      "productId": 2,
+      "quantity": 1,
+      "priceAtPurchase": 9.99
+    }
+  ]
+}

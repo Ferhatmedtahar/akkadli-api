@@ -1,13 +1,19 @@
 import { Body, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/providers/users.service';
+import { Repository } from 'typeorm';
 import { CreateProductDto } from '../dtos/createProduct.dto';
 import { GetProductParamsDto } from '../dtos/getProductParams.dto';
+import { Product } from '../product.entity';
 
 @Injectable()
 export class ProductsService {
   constructor(
     /**inject user service */
     private readonly usersService: UsersService,
+    /**inject products repository */
+    @InjectRepository(Product)
+    private readonly productsRepository: Repository<Product>,
   ) {}
   findAll() {
     //find a user and check if it exist in db
@@ -31,26 +37,28 @@ export class ProductsService {
       price: 10,
       discount: 0,
     };
-    // return the posts of that user
+    // return the products of that user
   }
   createProduct(@Body() createProductDto: CreateProductDto) {
     //1 find user from database based on the autor id
     //2 find tags from database based on the tag ids
-    //3 create post and return it
+    //3 create product and return it
   }
   public updateProduct() {
     //1 find the tags from database based on the tag ids , check if the number of found tags == number of tags was asked about
-    //2 find the post from database based on the post id
+    //2 find the product from database based on the product id
     //3 update the properties
-    //4 return the post
+    //4 return the product
   }
 
   public deleteProduct() {
-    //1 find the post from database based on the post id
-    //2 delete the post
+    //1 find the product from database based on the product id
+    //2 delete the product
   }
 
-  public getProductById(getProductParamsDto: GetProductParamsDto) {
-    //1 find the post from database based on the post id
+  public async getProductById(getProductParamsDto: GetProductParamsDto) {
+    return await this.productsRepository.findOne({
+      where: { id: getProductParamsDto.id },
+    });
   }
 }

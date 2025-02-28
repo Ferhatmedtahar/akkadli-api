@@ -1,14 +1,13 @@
-import { Order } from 'src/orders/order.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { OrderProduct } from '../order-product/order-product.entity';
 import { ProductSize } from './enums/productSize';
 
 @Entity()
@@ -68,22 +67,9 @@ export class Product {
   @Column({ type: 'text', nullable: true })
   imageUrl?: string;
 
-  @ManyToMany(() => Order, (order) => order.products, {
-    eager: true,
-    onDelete: 'RESTRICT',
-  })
-  @JoinTable({
-    name: 'order_products',
-    joinColumn: {
-      name: 'product_id',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'order_id',
-      referencedColumnName: 'id',
-    },
-  })
-  orders: Order[];
+  @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.product)
+  orderProducts: OrderProduct[];
+
   @CreateDateColumn()
   createdAt: Date;
 
