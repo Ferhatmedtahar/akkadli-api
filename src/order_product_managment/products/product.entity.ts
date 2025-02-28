@@ -3,12 +3,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { OrderProduct } from '../order-product/order-product.entity';
 import { ProductSize } from './enums/productSize';
+import { User } from 'src/users/user.entity';
 
 @Entity()
 export class Product {
@@ -70,6 +72,8 @@ export class Product {
   @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.product)
   orderProducts: OrderProduct[];
 
+  @ManyToOne(() => User, (user) => user.products)
+  user: User;
   @CreateDateColumn()
   createdAt: Date;
 

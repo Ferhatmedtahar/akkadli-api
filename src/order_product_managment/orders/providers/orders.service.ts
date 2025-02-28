@@ -1,11 +1,11 @@
 import { Body, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 import { ProductsService } from 'src/order_product_managment/products/providers/products.service';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from '../dtos/createOrder.dto';
 import { OrderStatus } from '../enums/orderStatus.enum';
 import { Order } from '../order.entity';
-import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 
 @Injectable()
 export class OrdersService {
@@ -29,7 +29,7 @@ export class OrdersService {
       isExternal: createOrderDto.isExternal || false,
       externalTrackingId: createOrderDto.externalTrackingId,
     });
-
+    //should call diff provider for each external order
     // Step 2: Save the Order to get an ID
 
     const savedOrder = await this.orderRepository.save(order);

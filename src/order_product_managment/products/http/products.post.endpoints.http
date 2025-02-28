@@ -1,0 +1,16 @@
+POST http://localhost:3000/products
+Content-Type:application/json
+
+{
+    "productName": "stickers",
+    "description": "This is a 50 stickers on one package",
+    "color": "black",
+    "size": "small",
+    "heavyWeight": false,
+    "price": 30,
+    "discount": 0,
+    "quantity": 12,
+    "inStock": true,
+    "totalProductsSold": 0,
+    "imageUrl": "https://example.com/image.jpg"
+}
