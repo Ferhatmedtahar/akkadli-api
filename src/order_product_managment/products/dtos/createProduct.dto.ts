@@ -102,17 +102,6 @@ export class CreateProductDto {
   @IsNotEmpty()
   quantity: number;
 
-  @IsBoolean()
-  @IsNotEmpty()
-  @ApiPropertyOptional({
-    title: 'inStock',
-    description: 'is the product in stock',
-    example: true,
-    required: true,
-    type: 'boolean',
-  })
-  inStock: boolean;
-
   @ApiProperty({
     title: 'totalProductsSold',
     description: 'total products sold',

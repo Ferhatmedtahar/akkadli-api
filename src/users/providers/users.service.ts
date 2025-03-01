@@ -22,7 +22,12 @@ export class UsersService {
   public async findUserById(id: number) {
     return await this.userRepository.findOne({
       where: { id },
-      relations: { deliveries: true },
+      relations: {
+        deliveries: true,
+        products: true,
+        orders: true,
+        address: true,
+      },
     });
   }
 

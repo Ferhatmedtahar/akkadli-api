@@ -1,3 +1,4 @@
+import { Order } from 'src/order_product_managment/orders/order.entity';
 import { Product } from 'src/order_product_managment/products/product.entity';
 import { Address } from 'src/settings/addresses/address.entity';
 import { Delivery } from 'src/settings/deliveries/delivery.entity';
@@ -65,6 +66,8 @@ export class User {
   @OneToMany(() => Product, (product) => product.user)
   products: Product[];
 
+  @OneToMany(() => Product, (product) => product.user)
+  orders: Order[];
   @CreateDateColumn()
   createDate: Date;
 

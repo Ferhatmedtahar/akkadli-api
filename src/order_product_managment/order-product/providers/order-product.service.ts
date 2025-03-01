@@ -26,4 +26,11 @@ export class OrderProductService {
   public async saveOrderProduct(orderProducts: OrderProduct[]) {
     return await this.orderProductRepository.save(orderProducts);
   }
+
+  public async findProductOrderById(id: number) {
+    return await this.orderProductRepository.find({
+      where: { id },
+      relations: { order: true, product: true },
+    });
+  }
 }

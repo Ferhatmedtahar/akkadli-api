@@ -1,8 +1,10 @@
+import { User } from 'src/users/user.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -42,6 +44,8 @@ export class Order {
   })
   orderProducts: OrderProduct[];
 
+  @ManyToOne(() => User, (user) => user.products)
+  user: User;
   @CreateDateColumn()
   createdAt: Date;
 
