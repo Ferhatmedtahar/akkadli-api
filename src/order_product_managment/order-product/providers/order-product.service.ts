@@ -23,6 +23,9 @@ export class OrderProductService {
     });
   }
 
+  public async updateOrderProductProvider(orderProduct: OrderProduct) {
+    return await this.orderProductRepository.save(orderProduct);
+  }
   public async saveOrderProduct(orderProducts: OrderProduct[]) {
     return await this.orderProductRepository.save(orderProducts);
   }

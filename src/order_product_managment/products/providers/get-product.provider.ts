@@ -59,4 +59,28 @@ export class GetProductProvider {
     // return the products of that user
     return user.products;
   }
+
+  public async getProductByIdWithRelations(
+    getProductParamsDto: GetProductParamsDto,
+  ) {
+    // get the user id from the request and Find the user
+    const userId = 19;
+    const user = await this.usersService.findUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Find the product and ensure it belongs to the user
+    const product = await this.productsRepository.findOne({
+      where: { id: getProductParamsDto.id, user: { id: userId } },
+      relations: { orderProducts: true },
+    });
+
+    if (!product) {
+      throw new ForbiddenException('You do not have access to this product');
+    }
+
+    return product;
+  }
 }

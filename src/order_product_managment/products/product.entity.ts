@@ -45,13 +45,14 @@ export class Product {
   @Column({
     type: 'boolean',
     nullable: true,
+    default: false,
   })
   heavyWeight?: boolean;
 
   @Column({ type: 'float', nullable: false })
   price: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'float', nullable: true, default: 0 })
   discount?: number;
 
   @Column({ type: 'float', nullable: false })

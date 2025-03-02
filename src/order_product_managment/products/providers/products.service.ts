@@ -1,8 +1,6 @@
 import { Body, Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 import { UsersService } from 'src/users/providers/users.service';
-import { Repository } from 'typeorm';
 import { CreateProductDto } from '../dtos/createProduct.dto';
 import { GetProductParamsDto } from '../dtos/getProductParams.dto';
 import { PatchProductDto } from '../dtos/patchProduct.dto';
@@ -42,7 +40,13 @@ export class ProductsService {
   findAll() {
     return this.getProductProvider.findAll();
   }
-
+  public async getProductByIdWithRelations(
+    getProductParamsDto: GetProductParamsDto,
+  ) {
+    return this.getProductProvider.getProductByIdWithRelations(
+      getProductParamsDto,
+    );
+  }
   public async updateProduct(
     @Param() getProductParamsDto: GetProductParamsDto,
     @Body() updateProductDto: PatchProductDto,

@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   MaxLength,
+  min,
 } from 'class-validator';
 import { ProductSize } from '../enums/productSize';
 
@@ -83,9 +84,11 @@ export class CreateProductDto {
   @ApiPropertyOptional({
     title: 'discount',
     description:
-      'discount of the product(0 is the default value, 100 is the max value)',
+      'discount of the product(0 is the default value, 1 is the max value)',
     default: 0,
-    example: 10,
+    example: 0.1,
+    maximum: 1,
+    minimum: 0,
     required: false,
     type: 'number',
   })

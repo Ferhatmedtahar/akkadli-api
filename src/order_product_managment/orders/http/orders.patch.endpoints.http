@@ -1,4 +1,4 @@
-POST http://localhost:3000/orders
+PATCH http://localhost:3000/orders
 Content-Type:application/json
 {
   "customerName": "John Doe",
@@ -7,16 +7,4 @@ Content-Type:application/json
   "status": "PENDING",
   "isExternal": false,
   "externalTrackingId": "",
-  "products": [
-    {
-      "productId": 1,
-      "quantity": 2,
-      
-    },
-    {
-      "productId": 2,
-      "quantity": 1,
-   
-    }
-  ]
 }

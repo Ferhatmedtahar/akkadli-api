@@ -1,12 +1,17 @@
-import { Body, Injectable, NotFoundException } from '@nestjs/common';
+import { Body, Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 import { ProductsService } from 'src/order_product_managment/products/providers/products.service';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from '../dtos/createOrder.dto';
-import { OrderStatus } from '../enums/orderStatus.enum';
+import { GetOrderParamsDto } from '../dtos/getOrderParams.dto';
+import { PatchOrderDto } from '../dtos/patchOrder.dto';
 import { Order } from '../order.entity';
+import { CreateOrderProvider } from './create-order.provider';
+import { DeleteOrderProvider } from './delete-order.provider';
+import { GetOrderProvider } from './get-order.provider';
+import { UpdateOrderProvider } from './update-order.provider';
 
 @Injectable()
 export class OrdersService {
@@ -21,57 +26,42 @@ export class OrdersService {
 
     /**inject user service */
     private readonly usersService: UsersService,
+    /**inject create order provider */
+    private readonly createOrderProvider: CreateOrderProvider,
+    /**inject get order provider */
+    private readonly getOrderProvider: GetOrderProvider,
+    /**inject update order provider */
+    private readonly updateOrderProvider: UpdateOrderProvider,
+    /**inject delete order provider */
+    private readonly deleteOrderProvider: DeleteOrderProvider,
   ) {}
 
   public async createOrder(@Body() createOrderDto: CreateOrderDto) {
-    // Step 1 : Get the user
-    const user = await this.usersService.findUserById(19);
-    // Step 2: Create the Order entity
-    const order = this.orderRepository.create({
-      customerName: createOrderDto.customerName,
-      phoneNumber: createOrderDto.phoneNumber,
-      address: createOrderDto.address,
-      status: createOrderDto.status || OrderStatus.PENDING,
-      isExternal: createOrderDto.isExternal || false,
-      externalTrackingId: createOrderDto.externalTrackingId || null,
-      user: user,
-    });
-    //should call diff provider for each external order
-    // Step 3: Save the Order to get an ID
+    return await this.createOrderProvider.createOrder(createOrderDto);
+  }
 
-    const savedOrder = await this.orderRepository.save(order);
+  public async getOrderbyId(@Param() getOrderParamsDto: GetOrderParamsDto) {
+    return await this.getOrderProvider.getOrder(getOrderParamsDto);
+  }
+  public async getAllOrders() {
+    return await this.getOrderProvider.getAllOrders();
+  }
 
-    // Step 4: Create and link OrderProduct entries
-
-    const orderProducts = await Promise.all(
-      createOrderDto.products.map(async (p) => {
-        const product = await this.productService.getProductById({
-          id: p.productId,
-        });
-
-        if (!product) {
-          throw new NotFoundException(
-            `Product with id ${p.productId} not found`,
-          );
-        }
-
-        const orderProduct =
-          this.orderProductService.createOrderProductProvider({
-            order: savedOrder,
-            product,
-            quantity: p.quantity,
-            priceAtPurchase: product.price,
-          });
-
-        return orderProduct;
-      }),
+  public async updateOrder(
+    @Param() getOrderParamsDto: GetOrderParamsDto,
+    @Body() updateOrderDto: PatchOrderDto,
+  ) {
+    return await this.updateOrderProvider.updateOrder(
+      getOrderParamsDto,
+      updateOrderDto,
     );
+  }
 
-    // Step 5: Save all OrderProduct entries
-    this.orderProductService.saveOrderProduct(orderProducts);
+  public async deleteOrder(@Param() getOrderParamsDto: GetOrderParamsDto) {
+    return this.deleteOrderProvider.deleteOrder(getOrderParamsDto);
+  }
 
-    // Step 6: Return the order with its orderProducts
-    savedOrder.orderProducts = orderProducts;
-    return savedOrder;
+  public async softDeleteOrder(@Param() getOrderParamsDto: GetOrderParamsDto) {
+    return this.deleteOrderProvider.softDeleteOrder(getOrderParamsDto);
   }
 }

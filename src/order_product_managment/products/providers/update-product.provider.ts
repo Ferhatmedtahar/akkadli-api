@@ -38,7 +38,15 @@ export class UpdateProductProvider {
     if (!product) {
       throw new NotFoundException('Product not found');
     }
-
+    if (updateProductDto.quantity <= 0) {
+      throw new BadRequestException('quantity must be greater than 0');
+    }
+    if (updateProductDto.price <= 0) {
+      throw new BadRequestException('price must be greater than 0');
+    }
+    if (updateProductDto.discount < 0 || updateProductDto.discount > 1) {
+      throw new BadRequestException('discount must be between 0 and 1');
+    }
     // 2. Check if the product has existing orders
     const hasOrders = product.orderProducts.length > 0;
 

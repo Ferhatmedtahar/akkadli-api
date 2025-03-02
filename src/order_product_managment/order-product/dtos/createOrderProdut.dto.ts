@@ -6,7 +6,4 @@ export class OrderProductDto {
 
   @IsNumber()
   quantity: number;
-
-  @IsNumber()
-  priceAtPurchase: number;
 }

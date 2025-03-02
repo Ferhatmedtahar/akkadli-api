@@ -1,17 +1,9 @@
-import {
-  BadRequestException,
-  Body,
-  Injectable,
-  NotFoundException,
-  Param,
-} from '@nestjs/common';
+import { BadRequestException, Body, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from '../dtos/createProduct.dto';
-import { GetProductParamsDto } from '../dtos/getProductParams.dto';
-import { PatchProductDto } from '../dtos/patchProduct.dto';
 import { Product } from '../product.entity';
 import { UpdateProductProvider } from './update-product.provider';
 
@@ -34,6 +26,15 @@ export class CreateProductProvider {
     const user = await this.usersService.findUserById(19);
     if (!user) {
       return { message: 'user not found', error: true };
+    }
+    if (createProductDto.quantity <= 0) {
+      throw new BadRequestException('quantity must be greater than 0');
+    }
+    if (createProductDto.price <= 0) {
+      throw new BadRequestException('price must be greater than 0');
+    }
+    if (createProductDto.discount < 0 || createProductDto.discount > 1) {
+      throw new BadRequestException('discount must be between 0 and 1');
     }
     //2 create product
     const product = this.productsRepository.create({
