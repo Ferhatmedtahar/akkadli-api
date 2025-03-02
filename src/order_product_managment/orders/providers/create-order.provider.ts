@@ -11,15 +11,10 @@ import { Order } from '../order.entity';
 @Injectable()
 export class CreateOrderProvider {
   constructor(
-    /**inject order repository */
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
-    /**inject product service */
     private readonly productService: ProductsService,
-    /**inject order product service */
     private readonly orderProductService: OrderProductService,
-
-    /**inject user service */
     private readonly usersService: UsersService,
   ) {}
 
@@ -28,8 +23,9 @@ export class CreateOrderProvider {
       throw new NotFoundException('Order cannot be empty');
     }
 
-    // Step 1 : Get the user
+    // Step 1: Get the user
     const user = await this.usersService.findUserById(19);
+
     // Step 2: Create the Order entity
     const order = this.orderRepository.create({
       customerName: createOrderDto.customerName,
@@ -40,13 +36,11 @@ export class CreateOrderProvider {
       externalTrackingId: createOrderDto.externalTrackingId || null,
       user: user,
     });
-    //should call diff provider for each external order
-    // Step 3: Save the Order to get an ID
 
+    // Step 3: Save the Order to get an ID
     const savedOrder = await this.orderRepository.save(order);
 
     // Step 4: Create and link OrderProduct entries
-
     const orderProducts = await Promise.all(
       createOrderDto.products.map(async (p) => {
         const product = await this.productService.getProductById({
@@ -58,18 +52,25 @@ export class CreateOrderProvider {
             `Product with id ${p.productId} not found`,
           );
         }
+
         const discountedPrice = product.discount
           ? product.price * (1 - product.discount)
           : product.price;
 
         if (p.quantity <= 0) {
-          throw new NotFoundException(`order cannot have negative quantity`);
+          throw new NotFoundException(`Order cannot have negative quantity`);
         }
         if (p.quantity > product.quantity) {
           throw new NotFoundException(
-            `Product with id ${p.productId} not Available`,
+            `Product with id ${p.productId} not available`,
           );
         }
+
+        // Update Product: reduce quantity, increase totalProductsSold
+        product.quantity -= p.quantity;
+        product.totalProductsSold += p.quantity;
+        console.log(product); // Debugging
+        await this.productService.updateProductfromOrder(product); // Fixed method name and added argument
 
         const orderProduct =
           this.orderProductService.createOrderProductProvider({
@@ -84,10 +85,98 @@ export class CreateOrderProvider {
     );
 
     // Step 5: Save all OrderProduct entries
-    this.orderProductService.saveOrderProduct(orderProducts);
+    await this.orderProductService.saveOrderProduct(orderProducts); // Added await
 
     // Step 6: Return the order with its orderProducts
     savedOrder.orderProducts = orderProducts;
     return savedOrder;
   }
 }
+
+// @Injectable()
+// export class CreateOrderProvider {
+//   constructor(
+//     /**inject order repository */
+//     @InjectRepository(Order)
+//     private orderRepository: Repository<Order>,
+//     /**inject product service */
+//     private readonly productService: ProductsService,
+//     /**inject order product service */
+//     private readonly orderProductService: OrderProductService,
+
+//     /**inject user service */
+//     private readonly usersService: UsersService,
+//   ) {}
+
+//   public async createOrder(@Body() createOrderDto: CreateOrderDto) {
+//     if (createOrderDto.products.length <= 0) {
+//       throw new NotFoundException('Order cannot be empty');
+//     }
+
+//     // Step 1 : Get the user
+//     const user = await this.usersService.findUserById(19);
+//     // Step 2: Create the Order entity
+//     const order = this.orderRepository.create({
+//       customerName: createOrderDto.customerName,
+//       phoneNumber: createOrderDto.phoneNumber,
+//       address: createOrderDto.address,
+//       status: createOrderDto.status || OrderStatus.PENDING,
+//       isExternal: createOrderDto.isExternal || false,
+//       externalTrackingId: createOrderDto.externalTrackingId || null,
+//       user: user,
+//     });
+//     //should call diff provider for each external order
+//     // Step 3: Save the Order to get an ID
+
+//     const savedOrder = await this.orderRepository.save(order);
+
+//     // Step 4: Create and link OrderProduct entries
+
+//     const orderProducts = await Promise.all(
+//       createOrderDto.products.map(async (p) => {
+//         const product = await this.productService.getProductById({
+//           id: p.productId,
+//         });
+
+//         if (!product) {
+//           throw new NotFoundException(
+//             `Product with id ${p.productId} not found`,
+//           );
+//         }
+//         const discountedPrice = product.discount
+//           ? product.price * (1 - product.discount)
+//           : product.price;
+
+//         if (p.quantity <= 0) {
+//           throw new NotFoundException(`order cannot have negative quantity`);
+//         }
+//         if (p.quantity > product.quantity) {
+//           throw new NotFoundException(
+//             `Product with id ${p.productId} not Available`,
+//           );
+//         }
+//         // Update Product: reduce quantity, increase totalProductsSold
+//         product.quantity -= p.quantity;
+//         product.totalProductsSold += p.quantity;
+//         console.log(product);
+//         await this.productService.updateProductfromOrder;
+//         const orderProduct =
+//           this.orderProductService.createOrderProductProvider({
+//             order: savedOrder,
+//             product,
+//             quantity: p.quantity,
+//             priceAtPurchase: discountedPrice,
+//           });
+
+//         return orderProduct;
+//       }),
+//     );
+
+//     // Step 5: Save all OrderProduct entries
+//     this.orderProductService.saveOrderProduct(orderProducts);
+
+//     // Step 6: Return the order with its orderProducts
+//     savedOrder.orderProducts = orderProducts;
+//     return savedOrder;
+//   }
+// }

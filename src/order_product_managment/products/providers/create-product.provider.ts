@@ -4,6 +4,7 @@ import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from '../dtos/createProduct.dto';
 import { Product } from '../product.entity';
+import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 
 @Injectable()
 export class CreateProductProvider {
@@ -36,6 +37,7 @@ export class CreateProductProvider {
     const product = this.productsRepository.create({
       ...createProductDto,
       inStock: createProductDto.quantity > 0 ? true : false,
+      totalProductsSold: 0,
       user: user,
     });
 

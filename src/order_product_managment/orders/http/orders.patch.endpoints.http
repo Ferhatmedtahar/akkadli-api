@@ -1,4 +1,4 @@
-PATCH http://localhost:3000/orders/3
+PATCH http://localhost:3000/orders/10
 Content-Type:application/json
 {
   "customerName": "tahar",
@@ -8,8 +8,8 @@ Content-Type:application/json
   "isExternal": false,
   "externalTrackingId": "",
   "products":[
-     {
-      "productId": 1,
+      {
+      "productId": 2,
       "quantity": 2
     }]
 }

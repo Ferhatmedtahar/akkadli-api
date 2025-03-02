@@ -1,4 +1,10 @@
-import { Body, Injectable, Param } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Injectable,
+  NotFoundException,
+  Param,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from '../dtos/createProduct.dto';
 import { GetProductParamsDto } from '../dtos/getProductParams.dto';
@@ -8,10 +14,15 @@ import { CreateProductProvider } from './create-product.provider';
 import { DeleteProductProvider } from './delete-product.provider';
 import { GetProductProvider } from './get-product.provider';
 import { UpdateProductProvider } from './update-product.provider';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProductsService {
   constructor(
+    /**inject products repository */
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+
     /**inject create product provider */
     private readonly createProductProvider: CreateProductProvider,
 
@@ -57,5 +68,21 @@ export class ProductsService {
     @Param() getProductParamsDto: GetProductParamsDto,
   ) {
     return this.deleteProductProvider.deleteProduct(getProductParamsDto);
+  }
+
+  public async updateProductfromOrder(product: Product) {
+    const existingProduct = await this.productRepository.findOne({
+      where: { id: product.id },
+    });
+    if (!existingProduct) {
+      throw new NotFoundException(`Product with ID ${product.id} not found`);
+    }
+
+    if (product.quantity < 0) {
+      throw new BadRequestException(
+        `Product ${product.id} quantity cannot be negative`,
+      );
+    }
+    return this.productRepository.save(product);
   }
 }

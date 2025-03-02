@@ -1,5 +1,5 @@
-PATCH http://localhost:3000/products/1
+PATCH http://localhost:3000/products/3
 Content-Type:application/json
 {
-  "color":"red"
+"productName":"laptop asus","quantity":3
 }

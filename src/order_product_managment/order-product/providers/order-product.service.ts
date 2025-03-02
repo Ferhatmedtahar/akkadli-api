@@ -12,6 +12,16 @@ export class OrderProductService {
     private orderProductRepository: Repository<OrderProduct>,
   ) {}
 
+  public async getTotalOrderedQuantity(productId: number): Promise<number> {
+    const result = await this.orderProductRepository
+      .createQueryBuilder('orderProduct')
+      .select('SUM(orderProduct.quantity)', 'total')
+      .where('orderProduct.productId = :productId', { productId })
+      .andWhere('orderProduct.deletedAt IS NULL')
+      .getRawOne<{ total: string | null }>(); // Ensure type safety
+
+    return result.total ? Number(result.total) : 0; // Convert to number & handle null
+  }
   public async createOrderProductProvider(
     createOrderProviderDto: CreateOrderProviderDto,
   ) {
