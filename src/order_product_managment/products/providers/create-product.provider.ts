@@ -1,11 +1,9 @@
 import { BadRequestException, Body, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from '../dtos/createProduct.dto';
 import { Product } from '../product.entity';
-import { UpdateProductProvider } from './update-product.provider';
 
 @Injectable()
 export class CreateProductProvider {
@@ -15,13 +13,11 @@ export class CreateProductProvider {
     /**inject products repository */
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
-    /**inject order product service */
-    private readonly orderProductService: OrderProductService,
-    /**inject update product provider */
-    private readonly updateProductProvider: UpdateProductProvider,
   ) {}
 
-  public async createProduct(@Body() createProductDto: CreateProductDto) {
+  public async createProductProvider(
+    @Body() createProductDto: CreateProductDto,
+  ) {
     //1 find user from database based on the autor id
     const user = await this.usersService.findUserById(19);
     if (!user) {

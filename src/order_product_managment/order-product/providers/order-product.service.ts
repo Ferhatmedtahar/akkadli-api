@@ -30,6 +30,15 @@ export class OrderProductService {
     return await this.orderProductRepository.save(orderProducts);
   }
 
+  public async removeOrderProduct(id: number) {
+    return await this.orderProductRepository.delete(id);
+  }
+  public async findByOrderId(id: number) {
+    return await this.orderProductRepository.find({
+      where: { order: { id } },
+      relations: { order: true, product: true },
+    });
+  }
   public async findProductOrderById(id: number) {
     return await this.orderProductRepository.find({
       where: { id },

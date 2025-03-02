@@ -24,6 +24,10 @@ export class CreateOrderProvider {
   ) {}
 
   public async createOrder(@Body() createOrderDto: CreateOrderDto) {
+    if (createOrderDto.products.length <= 0) {
+      throw new NotFoundException('Order cannot be empty');
+    }
+
     // Step 1 : Get the user
     const user = await this.usersService.findUserById(19);
     // Step 2: Create the Order entity
@@ -66,6 +70,7 @@ export class CreateOrderProvider {
             `Product with id ${p.productId} not Available`,
           );
         }
+
         const orderProduct =
           this.orderProductService.createOrderProductProvider({
             order: savedOrder,

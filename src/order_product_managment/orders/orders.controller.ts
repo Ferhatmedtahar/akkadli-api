@@ -47,7 +47,7 @@ export class OrdersController {
   public deleteOrder(@Param() getOrderParamsDto: GetOrderParamsDto) {
     return this.orderService.deleteOrder(getOrderParamsDto);
   }
-  @Delete('/soft-delete/:id')
+  @Delete('soft-delete/:id')
   public softDeleteOrder(@Param() getOrderParamsDto: GetOrderParamsDto) {
     return this.orderService.softDeleteOrder(getOrderParamsDto);
   }

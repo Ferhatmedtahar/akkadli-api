@@ -1,10 +1,15 @@
-PATCH http://localhost:3000/orders
+PATCH http://localhost:3000/orders/3
 Content-Type:application/json
 {
-  "customerName": "John Doe",
+  "customerName": "tahar",
   "phoneNumber": "0123456789",
-  "address": "123 Street, City, State",
+  "address": "Laghouat",
   "status": "PENDING",
   "isExternal": false,
   "externalTrackingId": "",
+  "products":[
+     {
+      "productId": 1,
+      "quantity": 2
+    }]
 }

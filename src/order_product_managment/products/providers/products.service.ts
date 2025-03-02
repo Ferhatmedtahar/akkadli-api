@@ -1,6 +1,5 @@
 import { Body, Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersService } from 'src/users/providers/users.service';
 import { CreateProductDto } from '../dtos/createProduct.dto';
 import { GetProductParamsDto } from '../dtos/getProductParams.dto';
 import { PatchProductDto } from '../dtos/patchProduct.dto';
@@ -13,10 +12,6 @@ import { UpdateProductProvider } from './update-product.provider';
 @Injectable()
 export class ProductsService {
   constructor(
-    /**inject user service */
-    private readonly usersService: UsersService,
-    /**inject products repository */
-    @InjectRepository(Product)
     /**inject create product provider */
     private readonly createProductProvider: CreateProductProvider,
 
@@ -31,13 +26,15 @@ export class ProductsService {
   ) {}
 
   public async createProduct(@Body() createProductDto: CreateProductDto) {
-    return this.createProductProvider.createProduct(createProductDto);
+    return await this.createProductProvider.createProductProvider(
+      createProductDto,
+    );
   }
 
   public async getProductById(getProductParamsDto: GetProductParamsDto) {
     return this.getProductProvider.getProductById(getProductParamsDto);
   }
-  findAll() {
+  public async findAll() {
     return this.getProductProvider.findAll();
   }
   public async getProductByIdWithRelations(

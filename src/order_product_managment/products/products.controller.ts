@@ -29,7 +29,7 @@ export class ProductsController {
   }
 
   @Post()
-  public createProduct(@Body() createProductDto: CreateProductDto) {
+  public create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.createProduct(createProductDto);
   }
   @Patch('/:id')
