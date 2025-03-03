@@ -3,6 +3,5 @@ Content-Type:application/json
 {
 "apiToken":"123456",
 "apiId":"123456",
-"name":"yalidine",
-"userId":13
+"name":"yalidine"
 }

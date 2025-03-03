@@ -1,9 +1,15 @@
-import { Body, Injectable } from '@nestjs/common';
+import { Body, Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { Delivery } from '../delivery.entity';
 import { CreateDeliveryDto } from '../dtos/createDeliveries.dto';
+import { CreateDeliveryProvider } from './create-delivery.provider';
+import { DeleteDeliveryProvider } from './delete-delivery.provider';
+import { GetDeliveryProvider } from './get-delivery.provider';
+import { UpdateDeliveryProvider } from './update-delivery.provider';
+import { GetDeliveryParamsDto } from '../dtos/getDeliveryParams.dto';
+import { PatchDeliveryDto } from '../dtos/patchDeliveries.dto';
 
 @Injectable()
 export class DeliveryService {
@@ -13,42 +19,39 @@ export class DeliveryService {
     private readonly deliveryRepository: Repository<Delivery>,
     /**inject user service */
     private readonly usersService: UsersService,
+    /**inject create delivery provider */
+    private readonly createDeliveryProvider: CreateDeliveryProvider,
+    /**inject get delivery provider */
+    private readonly getDeliveryProvider: GetDeliveryProvider,
+    /**inject update delivery provider */
+    private readonly updateDeliveryProvider: UpdateDeliveryProvider,
+    /**inject delete delivery provider */
+    private readonly deleteDeliveryProvider: DeleteDeliveryProvider,
   ) {}
   public async createDelivery(@Body() createDeliveryDto: CreateDeliveryDto) {
-    //get user  based on user id from body , later will change to getit from auth
-    const user = await this.usersService.findUserById(13);
-    console.log(user);
-    //create delivery
-    const delivery = this.deliveryRepository.create({
-      ...createDeliveryDto,
-      user: user,
-    });
-    //return the delivery
-    return await this.deliveryRepository.save(delivery);
+    return this.createDeliveryProvider.createDelivery(createDeliveryDto);
   }
 
-  public async findOneById(id: number) {
-    //get user id from request
-    const user = await this.usersService.findUserById(13);
-    //get delivery  by id
-    return await this.deliveryRepository.findOne({
-      where: { id: id },
-    });
+  public async findOneById(
+    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
+  ) {
+    return this.getDeliveryProvider.findOneById(getDeliveryParamsDto);
   }
   public async findAllByUserId() {
-    //get user id from request
-    //get all deliveries by user id
-    return `This action returns all deliveries of a user`;
+    return this.getDeliveryProvider.findAllByUserId();
   }
-  public async updateDelivery(id: number) {
-    //get user id from request
-    //get delivery  by id
-    // apply changes and save
-    return `This action updates a delivery ${id}`;
+  public async updateDelivery(
+    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
+    @Body() patchDeliveryDto: PatchDeliveryDto,
+  ) {
+    return this.updateDeliveryProvider.updateDelivery(
+      patchDeliveryDto,
+      getDeliveryParamsDto,
+    );
   }
-  public async deleteDelivery(id: number) {
-    //get user id from request
-    //delete delivery  by id
-    return `This action removes a delivery ${id}`;
+  public async deleteDelivery(
+    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
+  ) {
+    return this.deleteDeliveryProvider.deleteDelivery(getDeliveryParamsDto);
   }
 }

@@ -1,4 +1,14 @@
-import { Body, forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+  RequestTimeoutException,
+} from '@nestjs/common';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/providers/auth/auth.service';
@@ -31,30 +41,54 @@ export class UsersService {
     // console.log(this.configService.get<string>('NODE_ENV'));
     // console.log(this.configService.get<string>('STORAGE'));
     // console.log(this.profileConfiguration.apiKey);
-    return await this.userRepository.findOne({
-      where: { id },
-      relations: {
-        deliveries: true,
-        products: true,
-        orders: true,
-        address: true,
-      },
-    });
+    let user = undefined;
+    try {
+      user = await this.userRepository.findOne({
+        where: { id },
+        relations: {
+          deliveries: true,
+          products: true,
+          orders: true,
+          address: true,
+        },
+      });
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
+    if (!user) {
+      throw new BadRequestException('user Id does not exist');
+    }
+    return user;
   }
 
   public async createUser(@Body() createUserDto: CreateUserDto) {
-    console.log('from the body', createUserDto);
-
+    let userExists = undefined;
     //check if user exists
-    const userExists = await this.userRepository.findOneBy({
-      email: createUserDto.email,
-    });
+    try {
+      userExists = await this.userRepository.findOneBy({
+        email: createUserDto.email,
+      });
+    } catch (error) {
+      //can save the details later on a log file
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
 
     if (userExists) {
-      return {
-        message: 'user already exists',
-        error: true,
-      };
+      throw new BadRequestException(
+        'The user already exists, please check your email.',
+      );
     }
     //alter the dto if there are no address or general settings we use the default ones
     if (!createUserDto.address) {
@@ -66,27 +100,82 @@ export class UsersService {
     }
 
     // create user
-    const user = this.userRepository.create(createUserDto);
+    let newUser = this.userRepository.create(createUserDto);
 
-    console.log(user);
     // if not created throw an error
-    return await this.userRepository.save(user);
+    try {
+      newUser = await this.userRepository.save(newUser);
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
   }
 
   public async delete(id: number) {
-    console.log(id);
+    throw new HttpException(
+      {
+        status: HttpStatus.METHOD_NOT_ALLOWED,
+        error: 'can not delete a user',
+      },
+      HttpStatus.METHOD_NOT_ALLOWED,
+      {
+        description: 'the Api endpoint still under development',
+      },
+    );
+    let deletedUser = undefined;
     //delete the post , no need to delete seperatly the settings first because cascade
-    await this.userRepository.delete(id);
+    try {
+      deletedUser = await this.userRepository.delete(id);
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
     return { deleted: true, id };
   }
 
   public async udpateUser(@Body() patchUserDto: PatchUserDto, id: number) {
-    console.log(patchUserDto);
-    const updates = {
-      firstName: patchUserDto.firstName,
-      lastName: patchUserDto.lastName,
-    };
-    const updated = await this.userRepository.update(id, updates);
-    return updated;
+    let user = undefined;
+    try {
+      user = await this.userRepository.findOne({ where: { id } });
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
+    if (!user) {
+      throw new NotFoundException(`user not found, please sign up`, {
+        description: 'error finding the user',
+      });
+    }
+
+    user.firstName = patchUserDto.firstName;
+    user.lastName = patchUserDto.lastName;
+
+    try {
+      await this.userRepository.save(user);
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
+    return user;
   }
 }

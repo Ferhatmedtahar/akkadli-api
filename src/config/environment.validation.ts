@@ -22,4 +22,6 @@ export default joi.object({
   DATABASE_AUTOLOAD_ENTITIES: joi.string().valid('true', 'false').required(),
 
   PROFILE_API_KEY: joi.string().required(),
+
+  PORT: joi.number().default(3000),
 });

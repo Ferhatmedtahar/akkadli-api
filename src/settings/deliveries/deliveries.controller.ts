@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { CreateDeliveryDto } from './dtos/createDeliveries.dto';
 import { DeliveryService } from './providers/delivery.service';
+import { GetDeliveryParamsDto } from './dtos/getDeliveryParams.dto';
+import { PatchDeliveryDto } from './dtos/patchDeliveries.dto';
 
 @Controller('settings/deliveries')
 export class DeliveriesController {
@@ -28,16 +30,22 @@ export class DeliveriesController {
   }
 
   @Get('/:id')
-  public findOneById(@Param('id') id: number) {
-    return this.deliveriesService.findOneById(id);
+  public findOneById(@Param() getDeliveryParamsDto: GetDeliveryParamsDto) {
+    return this.deliveriesService.findOneById(getDeliveryParamsDto);
   }
 
   @Patch('/:id')
-  public updateDelivery(@Param('id') id: number) {
-    return this.deliveriesService.updateDelivery(id);
+  public updateDelivery(
+    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
+    @Body() patchDeliveryDto: PatchDeliveryDto,
+  ) {
+    return this.deliveriesService.updateDelivery(
+      getDeliveryParamsDto,
+      patchDeliveryDto,
+    );
   }
   @Delete('/:id')
-  public deleteDelivery(@Param('id') id: number) {
-    return this.deliveriesService.deleteDelivery(id);
+  public deleteDelivery(@Param() getDeliveryParamsDto: GetDeliveryParamsDto) {
+    return this.deliveriesService.deleteDelivery(getDeliveryParamsDto);
   }
 }

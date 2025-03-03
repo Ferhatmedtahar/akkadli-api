@@ -9,7 +9,7 @@ export class Delivery {
   @Column({ type: 'varchar', length: 100 })
   name: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, unique: true })
   apiId: string;
 
   @Column({ type: 'varchar', length: 255 })

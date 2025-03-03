@@ -1,9 +1,15 @@
-import { Body, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Injectable,
+  RequestTimeoutException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
-import { GeneralSettings } from '../general-settings.entity';
 import { PatchGeneralSettingsDto } from '../dtos/patchGeneralSettings.dto';
+import { GeneralSettings } from '../general-settings.entity';
 
 @Injectable()
 export class PatchGeneralSettings {
@@ -17,20 +23,76 @@ export class PatchGeneralSettings {
   public async updateGeneralSettings(
     @Body() patchAddressDto: PatchGeneralSettingsDto,
   ) {
+    let user = undefined;
+    let generalSettings = undefined;
+    let savedGeneralSettings = undefined;
     //find the user using the user service and id from the auth token
-    const user = await this.usersService.findUserById(19);
-    console.log(user);
+    try {
+      user = await this.usersService.findUserById(19);
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
+    if (!user) {
+      throw new UnauthorizedException('user not found', {
+        description: 'error finding the user',
+      });
+    }
+
     //find the address using the user
-    const generalSettings = await this.addressRepository.findOneById(
-      user.generalSettings.id,
-    );
+    try {
+      generalSettings = await this.addressRepository.findOneById(
+        user.generalSettings.id,
+      );
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
+
+    if (!generalSettings) {
+      throw new UnauthorizedException('general settings not found', {
+        description: 'error finding the general settings',
+      });
+    }
     generalSettings.businessName =
-      patchAddressDto.businessName || generalSettings.businessName;
+      patchAddressDto.businessName ?? generalSettings.businessName;
     generalSettings.businessDescription =
-      patchAddressDto.businessDescription ||
+      patchAddressDto.businessDescription ??
       generalSettings.businessDescription;
     generalSettings.phoneNumber =
-      patchAddressDto.phoneNumber || generalSettings.phoneNumber;
-    return await this.addressRepository.save(generalSettings);
+      patchAddressDto.phoneNumber ?? generalSettings.phoneNumber;
+
+    try {
+      savedGeneralSettings = await this.addressRepository.save(generalSettings);
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
+    if (!savedGeneralSettings) {
+      throw new UnauthorizedException('general settings not found', {
+        description: 'error finding the general settings',
+      });
+    }
+    if (!savedGeneralSettings) {
+      throw new BadRequestException('General settings not updated', {
+        description: 'error updating the general settings',
+      });
+    }
+    return savedGeneralSettings;
   }
 }
