@@ -1,10 +1,11 @@
 import { Body, forwardRef, Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigService, ConfigType } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/providers/auth/auth.service';
 import { defaultAddress } from 'src/settings/addresses/constants/defaultAddress.const';
 import { defaultGeneralSettings } from 'src/settings/general-settings/constants/defaultGeneralSettings.const';
 import { Repository } from 'typeorm';
+import profileConfig from '../config/profile.config';
 import { CreateUserDto } from '../dtos/createUser.dto';
 import { PatchUserDto } from '../dtos/patchUser.dto';
 import { User } from '../user.entity';
@@ -12,6 +13,9 @@ import { User } from '../user.entity';
 @Injectable()
 export class UsersService {
   constructor(
+    /**inject profile config */
+    @Inject(profileConfig.KEY)
+    private readonly profileConfiguration: ConfigType<typeof profileConfig>,
     /**inject auth service */
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
@@ -24,8 +28,9 @@ export class UsersService {
 
   public async findUserById(id: number) {
     // console.log(this.configService.get<string>('STORAGE')); work using the .env at start
-    console.log(this.configService.get<string>('NODE_ENV'));
-    console.log(this.configService.get<string>('STORAGE'));
+    // console.log(this.configService.get<string>('NODE_ENV'));
+    // console.log(this.configService.get<string>('STORAGE'));
+    // console.log(this.profileConfiguration.apiKey);
     return await this.userRepository.findOne({
       where: { id },
       relations: {

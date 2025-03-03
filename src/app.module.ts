@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import appConfig from './config/app.config';
+import databaseConfig from './config/database.config';
+import environmentValidation from './config/environment.validation';
 import { OrderProductModule } from './order_product_managment/order-product/order-product.module';
 import { OrdersModule } from './order_product_managment/orders/orders.module';
 import { ProductsModule } from './order_product_managment/products/products.module';
@@ -20,8 +23,8 @@ const ENV = process.env.NODE_ENV.trim();
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: !ENV ? '.env' : `.env.${ENV}`,
-      // load:[appConfig,databaseConfig]
-      // validationSchema:environmentValidation
+      load: [appConfig, databaseConfig],
+      validationSchema: environmentValidation,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -29,13 +32,13 @@ const ENV = process.env.NODE_ENV.trim();
       useFactory: (configService: ConfigService) => {
         return {
           type: 'postgres',
-          autoLoadEntities: true,
-          synchronize: true,
-          port: parseInt(configService.get('DATABASE_PORT')),
-          username: configService.get('DATABASE_USERNAME'),
-          password: configService.get('DATABASE_PASSWORD'),
-          host: 'localhost',
-          database: 'akkadli',
+          autoLoadEntities: configService.get('database.autoLoadEntities'),
+          synchronize: configService.get('database.synchronize'),
+          port: +configService.get('database.port'),
+          username: configService.get('database.username'),
+          password: configService.get('database.password'),
+          host: configService.get('database.host'),
+          database: configService.get('database.name'),
         };
       },
     }),
