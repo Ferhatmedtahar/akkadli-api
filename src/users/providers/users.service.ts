@@ -1,4 +1,5 @@
 import { Body, forwardRef, Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/providers/auth/auth.service';
 import { defaultAddress } from 'src/settings/addresses/constants/defaultAddress.const';
@@ -17,9 +18,14 @@ export class UsersService {
     /**inject user repository */
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    /**inject config service */
+    private readonly configService: ConfigService,
   ) {}
 
   public async findUserById(id: number) {
+    // console.log(this.configService.get<string>('STORAGE')); work using the .env at start
+    console.log(this.configService.get<string>('NODE_ENV'));
+    console.log(this.configService.get<string>('STORAGE'));
     return await this.userRepository.findOne({
       where: { id },
       relations: {

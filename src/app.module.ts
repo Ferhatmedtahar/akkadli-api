@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { OrderProductModule } from './order_product_managment/order-product/order-product.module';
 import { OrdersModule } from './order_product_managment/orders/orders.module';
 import { ProductsModule } from './order_product_managment/products/products.module';
 import { AddressModule } from './settings/addresses/address.module';
@@ -10,22 +10,30 @@ import { DeliveriesModule } from './settings/deliveries/deliveries.module';
 import { GeneralSettingsModule } from './settings/general-settings/general_settings.module';
 import { SettingsModule } from './settings/settings.module';
 import { UsersModule } from './users/users.module';
-import { OrderProductModule } from './order_product_managment/order-product/order-product.module';
 
+const ENV = process.env.NODE_ENV.trim();
 @Module({
   imports: [
     UsersModule,
     AuthModule,
     ProductsModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: !ENV ? '.env' : `.env.${ENV}`,
+      // load:[appConfig,databaseConfig]
+      // validationSchema:environmentValidation
+    }),
     TypeOrmModule.forRootAsync({
-      useFactory: () => {
+      inject: [ConfigService],
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
         return {
           type: 'postgres',
           autoLoadEntities: true,
           synchronize: true,
-          port: 5432,
-          username: 'postgres',
-          password: 'FERHATSAKI',
+          port: parseInt(configService.get('DATABASE_PORT')),
+          username: configService.get('DATABASE_USERNAME'),
+          password: configService.get('DATABASE_PASSWORD'),
           host: 'localhost',
           database: 'akkadli',
         };
@@ -38,7 +46,7 @@ import { OrderProductModule } from './order_product_managment/order-product/orde
     GeneralSettingsModule,
     OrderProductModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
