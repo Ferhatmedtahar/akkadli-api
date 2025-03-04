@@ -25,10 +25,10 @@ export class OrderProduct {
   })
   product: Product;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: false })
   quantity: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', nullable: false })
   priceAtPurchase: number;
 
   @CreateDateColumn()

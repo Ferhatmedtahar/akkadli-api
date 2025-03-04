@@ -1,19 +1,15 @@
 POST http://localhost:3000/orders
 Content-Type:application/json
 {
-  "customerName": "ferhat tahar testing product changes",
+  "customerName": "ferhat tahar testing create order transaction",
   "phoneNumber": "0123456789",
   "address": "Algeria, Laghouat, Laghouat",
   "status": "PENDING",
   "isExternal": false,
   "externalTrackingId": "",
-  "products": [
-    {
-      "productId": 1,
-      "quantity": 8
-    },   {
+  "products": [  {
       "productId": 4,
-      "quantity": 2
+      "quantity": 1
     }
  
   ]

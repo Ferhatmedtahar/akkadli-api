@@ -78,7 +78,7 @@ export class UpdateOrderProvider {
         });
         product.quantity += op.quantity; // Return stock
         product.totalProductsSold -= op.quantity; // Reduce sold count
-        await this.productService.updateProductfromOrder(product); // Fixed method name
+        await this.productService.updateProductFromOrder(product); // Fixed method name
         await this.orderProductService.removeOrderProduct(op.id);
       }
 
@@ -108,7 +108,7 @@ export class UpdateOrderProvider {
             }
             product.quantity -= quantityDiff; // Reduce/increase stock
             product.totalProductsSold += quantityDiff; // Adjust sold count
-            await this.productService.updateProductfromOrder(product);
+            await this.productService.updateProductFromOrder(product);
 
             existingOrderProduct.quantity = p.quantity;
             await this.orderProductService.updateOrderProductProvider(
@@ -124,7 +124,7 @@ export class UpdateOrderProvider {
           }
           product.quantity -= p.quantity;
           product.totalProductsSold += p.quantity;
-          await this.productService.updateProductfromOrder(product);
+          await this.productService.updateProductFromOrder(product);
 
           const orderProductToCreate =
             await this.orderProductService.createOrderProductProvider({

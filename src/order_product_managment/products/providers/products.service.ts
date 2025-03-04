@@ -14,7 +14,7 @@ import { CreateProductProvider } from './create-product.provider';
 import { DeleteProductProvider } from './delete-product.provider';
 import { GetProductProvider } from './get-product.provider';
 import { UpdateProductProvider } from './update-product.provider';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
 export class ProductsService {
@@ -70,19 +70,46 @@ export class ProductsService {
     return this.deleteProductProvider.deleteProduct(getProductParamsDto);
   }
 
-  public async updateProductfromOrder(product: Product) {
-    const existingProduct = await this.productRepository.findOne({
+  public async updateProductFromOrder(
+    product: Product,
+    manager?: EntityManager,
+  ): Promise<Product> {
+    // Use the provided manager if available, otherwise use the repository
+    const repository = manager
+      ? manager.getRepository(Product)
+      : this.productRepository;
+
+    // Find the existing product using the repository
+    const existingProduct = await repository.findOne({
       where: { id: product.id },
     });
     if (!existingProduct) {
       throw new NotFoundException(`Product with ID ${product.id} not found`);
     }
 
+    // Validate quantity
     if (product.quantity < 0) {
       throw new BadRequestException(
         `Product ${product.id} quantity cannot be negative`,
       );
     }
-    return this.productRepository.save(product);
+
+    // Save the updated product using the repository
+    return repository.save(product);
   }
+  // public async updateProductFromOrder(product: Product) {
+  //   const existingProduct = await this.productRepository.findOne({
+  //     where: { id: product.id },
+  //   });
+  //   if (!existingProduct) {
+  //     throw new NotFoundException(`Product with ID ${product.id} not found`);
+  //   }
+
+  //   if (product.quantity < 0) {
+  //     throw new BadRequestException(
+  //       `Product ${product.id} quantity cannot be negative`,
+  //     );
+  //   }
+  //   return this.productRepository.save(product);
+  // }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { CreateOrderProviderDto } from '../dtos/createOrderProductProvider.dto';
 import { OrderProduct } from '../order-product.entity';
 
@@ -20,14 +20,14 @@ export class OrderProductService {
       .andWhere('orderProduct.deletedAt IS NULL')
       .getRawOne<{ total: string | null }>(); // Ensure type safety
 
-    return result.total ? Number(result.total) : 0; // Convert to number & handle null
+    return result.total ? Number(result.total) : 0;
   }
   public async createOrderProductProvider(
     createOrderProviderDto: CreateOrderProviderDto,
   ) {
     return this.orderProductRepository.create({
-      order: createOrderProviderDto.order, // Explicitly set the saved Order
-      product: createOrderProviderDto.product, // Explicitly set the Product entity
+      order: createOrderProviderDto.order,
+      product: createOrderProviderDto.product,
       quantity: createOrderProviderDto.quantity,
       priceAtPurchase: createOrderProviderDto.priceAtPurchase,
     });
@@ -36,8 +36,15 @@ export class OrderProductService {
   public async updateOrderProductProvider(orderProduct: OrderProduct) {
     return await this.orderProductRepository.save(orderProduct);
   }
-  public async saveOrderProduct(orderProducts: OrderProduct[]) {
-    return await this.orderProductRepository.save(orderProducts);
+  public async saveOrderProduct(
+    orderProducts: OrderProduct[],
+    manager?: EntityManager,
+  ) {
+    const repository = manager
+      ? manager.getRepository(OrderProduct)
+      : this.orderProductRepository;
+
+    return await repository.save(orderProducts);
   }
 
   public async removeOrderProduct(id: number) {
