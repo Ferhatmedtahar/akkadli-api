@@ -1,4 +1,8 @@
-import { Injectable, RequestTimeoutException } from '@nestjs/common';
+import {
+  Injectable,
+  RequestTimeoutException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
@@ -41,6 +45,11 @@ export class GetGeneralSettings {
           // cause: error,
         },
       );
+    }
+    if (!generalSettings) {
+      throw new UnauthorizedException('user not found', {
+        description: 'error finding the user',
+      });
     }
     return generalSettings;
   }

@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
   Param,
+  RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
@@ -28,11 +29,36 @@ export class UpdateProductProvider {
     @Param() getProductParamsDto: GetProductParamsDto,
     @Body() updateProductDto: PatchProductDto,
   ) {
+    let product = undefined;
+    let user = undefined;
+    let totalOrderedQuantity = undefined;
+    try {
+      user = await this.usersService.findUserById(19);
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
     // 1. Find the product with its orders
-    const product = await this.productsRepository.findOne({
-      where: { id: getProductParamsDto.id },
-      relations: { orderProducts: true },
-    });
+
+    try {
+      product = await this.productsRepository.findOne({
+        where: { id: getProductParamsDto.id, user: { id: user.id } },
+        relations: { orderProducts: true },
+      });
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
     if (!product) {
       throw new NotFoundException('Product not found');
     }
@@ -55,8 +81,18 @@ export class UpdateProductProvider {
     }
 
     // 3. Get total quantity of this product in active orders
-    const totalOrderedQuantity =
-      await this.orderProductService.getTotalOrderedQuantity(product.id);
+    try {
+      totalOrderedQuantity =
+        await this.orderProductService.getTotalOrderedQuantity(product.id);
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
 
     // 4. If updating quantity, ensure it’s not less than the total ordered quantity
     if (
@@ -89,6 +125,17 @@ export class UpdateProductProvider {
 
     // 7. Update and save product
     Object.assign(product, updateProductDto);
-    return await this.productsRepository.save(product);
+    try {
+      product = await this.productsRepository.save(product);
+      return product;
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
   }
 }

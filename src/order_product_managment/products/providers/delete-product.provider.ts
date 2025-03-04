@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Param } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Param,
+  RequestTimeoutException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 import { UsersService } from 'src/users/providers/users.service';
@@ -24,13 +29,42 @@ export class DeleteProductProvider {
   public async deleteProduct(
     @Param() getProductParamsDto: GetProductParamsDto,
   ) {
+    let user = undefined;
+    let product = undefined;
+
+    try {
+      user = await this.usersService.findUserById(19);
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
+
     //1 find the product from database based on the product id
-    const product = await this.productsRepository.findOne({
-      where: { id: getProductParamsDto.id },
-      relations: {
-        orderProducts: true,
-      },
-    });
+    try {
+      product = await this.productsRepository.findOne({
+        where: { id: getProductParamsDto.id, user: { id: user.id } },
+        relations: {
+          orderProducts: true,
+        },
+      });
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
+
+    if (!product) {
+      throw new BadRequestException('Product not found');
+    }
 
     if (product.orderProducts.length > 0) {
       throw new BadRequestException(
@@ -38,6 +72,17 @@ export class DeleteProductProvider {
       );
     }
     //2 delete the product
-    return await this.productsRepository.delete(product.id);
+    try {
+      await this.productsRepository.delete(product.id);
+      return { message: 'product deleted', deleted: true, id: product.id };
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
   }
 }

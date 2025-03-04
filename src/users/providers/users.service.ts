@@ -7,6 +7,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Param,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { ConfigService, ConfigType } from '@nestjs/config';
@@ -17,6 +18,7 @@ import { defaultGeneralSettings } from 'src/settings/general-settings/constants/
 import { Repository } from 'typeorm';
 import profileConfig from '../config/profile.config';
 import { CreateUserDto } from '../dtos/createUser.dto';
+import { GetUserParamsDto } from '../dtos/getUserParams.dto';
 import { PatchUserDto } from '../dtos/patchUser.dto';
 import { User } from '../user.entity';
 
@@ -36,7 +38,7 @@ export class UsersService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async findUserById(id: number) {
+  public async findUserById(id: number): Promise<User> {
     // console.log(this.configService.get<string>('STORAGE')); work using the .env at start
     // console.log(this.configService.get<string>('NODE_ENV'));
     // console.log(this.configService.get<string>('STORAGE'));
@@ -116,7 +118,7 @@ export class UsersService {
     }
   }
 
-  public async delete(id: number) {
+  public async delete(@Param() getUserParamsDto: GetUserParamsDto) {
     throw new HttpException(
       {
         status: HttpStatus.METHOD_NOT_ALLOWED,
@@ -130,7 +132,7 @@ export class UsersService {
     let deletedUser = undefined;
     //delete the post , no need to delete seperatly the settings first because cascade
     try {
-      deletedUser = await this.userRepository.delete(id);
+      deletedUser = await this.userRepository.delete(getUserParamsDto.id);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
@@ -140,13 +142,18 @@ export class UsersService {
         },
       );
     }
-    return { deleted: true, id };
+    return { deleted: true, id: getUserParamsDto.id };
   }
 
-  public async udpateUser(@Body() patchUserDto: PatchUserDto, id: number) {
+  public async udpateUser(
+    @Body() patchUserDto: PatchUserDto,
+    @Param() getUserParamsDto: GetUserParamsDto,
+  ) {
     let user = undefined;
     try {
-      user = await this.userRepository.findOne({ where: { id } });
+      user = await this.userRepository.findOne({
+        where: { id: getUserParamsDto.id },
+      });
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',

@@ -1,7 +1,7 @@
 POST http://localhost:3000/products
 Content-Type:application/json
 {
-    "productName": "fans",
+    "productName": "fa111ns",
     "description": "This is dell laptop",
     "color": "black",
     "size": "small",

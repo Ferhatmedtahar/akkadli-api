@@ -1,7 +1,8 @@
 import {
-  ForbiddenException,
+  BadRequestException,
   Injectable,
   NotFoundException,
+  RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
@@ -28,19 +29,45 @@ export class GetProductProvider {
   public async getProductById(getProductParamsDto: GetProductParamsDto) {
     // get the user id from the request and Find the user
     const userId = 19;
-    const user = await this.usersService.findUserById(userId);
+    let user = undefined;
+    let product = undefined;
+    try {
+      user = await this.usersService.findUserById(userId);
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('User not found', {
+        description: 'user not found in the database',
+      });
     }
 
     // Find the product and ensure it belongs to the user
-    const product = await this.productsRepository.findOne({
-      where: { id: getProductParamsDto.id, user: { id: userId } },
-    });
+    try {
+      product = await this.productsRepository.findOne({
+        where: { id: getProductParamsDto.id, user: { id: userId } },
+      });
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
 
     if (!product) {
-      throw new ForbiddenException('You do not have access to this product');
+      throw new BadRequestException('product not found', {
+        description: 'product not found with the provided id or does not exist',
+      });
     }
 
     return product;
@@ -48,16 +75,40 @@ export class GetProductProvider {
   public async findAll() {
     //find a user and check if it exist in db
     //TODO later change the user to the current user on the requuest
-    const user = await this.usersService.findUserById(19);
+    let user = undefined;
+    let products = undefined;
+    try {
+      user = await this.usersService.findUserById(19);
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
 
     if (!user) {
-      return {
-        message: 'user not found',
-        error: true,
-      };
+      throw new NotFoundException('User not found');
     }
+
     // return the products of that user
-    return user.products;
+    try {
+      products = await this.productsRepository.find({
+        where: { user: { id: user.id } },
+      });
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
+
+    return products;
   }
 
   public async getProductByIdWithRelations(
@@ -65,20 +116,42 @@ export class GetProductProvider {
   ) {
     // get the user id from the request and Find the user
     const userId = 19;
-    const user = await this.usersService.findUserById(userId);
+    let user = undefined;
+    let product = undefined;
+    try {
+      user = await this.usersService.findUserById(userId);
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     // Find the product and ensure it belongs to the user
-    const product = await this.productsRepository.findOne({
-      where: { id: getProductParamsDto.id, user: { id: userId } },
-      relations: { orderProducts: true },
-    });
+    try {
+      product = await this.productsRepository.findOne({
+        where: { id: getProductParamsDto.id, user: { id: userId } },
+        relations: { orderProducts: true },
+      });
+    } catch {
+      throw new RequestTimeoutException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
 
     if (!product) {
-      throw new ForbiddenException('You do not have access to this product');
+      throw new BadRequestException('product not found or does not exist');
     }
 
     return product;

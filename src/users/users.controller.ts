@@ -18,6 +18,7 @@ import {
 import { CreateUserDto } from './dtos/createUser.dto';
 import { PatchUserDto } from './dtos/patchUser.dto';
 import { UsersService } from './providers/users.service';
+import { GetUserParamsDto } from './dtos/getUserParams.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -44,13 +45,13 @@ export class UsersController {
   @Patch('/:id')
   public patchUsers(
     @Body() patchUserDto: PatchUserDto,
-    @Param('id', ParseIntPipe) id: number,
+    @Param() getUserParamsDto: GetUserParamsDto,
   ) {
-    return this.usersService.udpateUser(patchUserDto, id);
+    return this.usersService.udpateUser(patchUserDto, getUserParamsDto);
   }
 
   @Delete('/:id')
-  public deleteUsers(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.delete(id);
+  public deleteUsers(@Param() getUserParamsDto: GetUserParamsDto) {
+    return this.usersService.delete(getUserParamsDto);
   }
 }
