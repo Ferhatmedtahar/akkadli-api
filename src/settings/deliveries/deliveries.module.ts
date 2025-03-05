@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PaginationModule } from 'src/common/pagination/pagination.module';
 import { UsersModule } from 'src/users/users.module';
 import { DeliveriesController } from './deliveries.controller';
 import { Delivery } from './delivery.entity';
@@ -18,6 +19,10 @@ import { UpdateDeliveryProvider } from './providers/update-delivery.provider';
     UpdateDeliveryProvider,
     DeleteDeliveryProvider,
   ],
-  imports: [TypeOrmModule.forFeature([Delivery]), UsersModule],
+  imports: [
+    TypeOrmModule.forFeature([Delivery]),
+    UsersModule,
+    PaginationModule,
+  ],
 })
 export class DeliveriesModule {}

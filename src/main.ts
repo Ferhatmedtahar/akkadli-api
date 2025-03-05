@@ -10,9 +10,10 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-      // transformOptions: {
-      //   enableImplicitConversion: true,
-      // },
+      transformOptions: {
+        // no need to add @Type(()=>Number) on dtos but still
+        enableImplicitConversion: true,
+      },
     }),
   );
   const config = new DocumentBuilder()
@@ -22,7 +23,6 @@ async function bootstrap() {
     .setTermsOfService('https://example.com/terms')
     .setLicense('MIT', 'https://opensource.org/licenses/MIT')
     .addServer('http://localhost:3000/')
-
     .build();
   //Instantiate document
   const document = SwaggerModule.createDocument(app, config);

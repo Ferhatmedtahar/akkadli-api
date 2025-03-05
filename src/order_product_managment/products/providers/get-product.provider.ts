@@ -5,12 +5,12 @@ import {
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
+import { PaginationService } from 'src/common/pagination/pagination.service';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { GetProductParamsDto } from '../dtos/getProductParams.dto';
+import { GetProductsDto } from '../dtos/getProducts.dto';
 import { Product } from '../product.entity';
-import { UpdateProductProvider } from './update-product.provider';
 
 @Injectable()
 export class GetProductProvider {
@@ -20,10 +20,8 @@ export class GetProductProvider {
     /**inject products repository */
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
-    /**inject order product service */
-    private readonly orderProductService: OrderProductService,
-    /**inject update product provider */
-    private readonly updateProductProvider: UpdateProductProvider,
+    /**pagination service */
+    private readonly paginationService: PaginationService,
   ) {}
 
   public async getProductById(getProductParamsDto: GetProductParamsDto) {
@@ -72,7 +70,7 @@ export class GetProductProvider {
 
     return product;
   }
-  public async findAll() {
+  public async findAll(productsQuery: GetProductsDto) {
     //find a user and check if it exist in db
     //TODO later change the user to the current user on the requuest
     let user = undefined;
@@ -95,10 +93,14 @@ export class GetProductProvider {
 
     // return the products of that user
     try {
-      products = await this.productsRepository.find({
-        where: { user: { id: user.id } },
-      });
-    } catch {
+      const where = { user: { id: user.id } };
+      products = await this.paginationService.paginateQuery(
+        productsQuery,
+        this.productsRepository,
+        where,
+      );
+    } catch (e) {
+      console.log(e);
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
         {

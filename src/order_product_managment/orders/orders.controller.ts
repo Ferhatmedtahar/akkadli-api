@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateOrderDto } from './dtos/createOrder.dto';
 import { GetOrderParamsDto } from './dtos/getOrderParams.dto';
 import { PatchOrderDto } from './dtos/patchOrder.dto';
 import { OrdersService } from './providers/orders.service';
+import { GetOrdersDto } from './dtos/getOrders.dto';
 
 @Controller('orders')
 @ApiTags('Orders')
@@ -31,8 +33,8 @@ export class OrdersController {
   }
 
   @Get()
-  public getAllOrders() {
-    return this.orderService.getAllOrders();
+  public getAllOrders(@Query() ordersQuery: GetOrdersDto) {
+    return this.orderService.getAllOrders(ordersQuery);
   }
 
   @Patch('/:id')

@@ -12,6 +12,7 @@ import { CreateOrderProvider } from './create-order.provider';
 import { DeleteOrderProvider } from './delete-order.provider';
 import { GetOrderProvider } from './get-order.provider';
 import { UpdateOrderProvider } from './update-order.provider';
+import { GetOrdersDto } from '../dtos/getOrders.dto';
 
 @Injectable()
 export class OrdersService {
@@ -43,8 +44,8 @@ export class OrdersService {
   public async getOrderbyId(@Param() getOrderParamsDto: GetOrderParamsDto) {
     return await this.getOrderProvider.getOrder(getOrderParamsDto);
   }
-  public async getAllOrders() {
-    return await this.getOrderProvider.getAllOrders();
+  public async getAllOrders(ordersQuery: GetOrdersDto) {
+    return await this.getOrderProvider.getAllOrders(ordersQuery);
   }
 
   public async updateOrder(

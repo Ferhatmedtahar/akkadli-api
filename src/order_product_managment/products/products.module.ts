@@ -9,14 +9,22 @@ import { UpdateProductProvider } from './providers/update-product.provider';
 import { CreateProductProvider } from './providers/create-product.provider';
 import { GetProductProvider } from './providers/get-product.provider';
 import { DeleteProductProvider } from './providers/delete-product.provider';
+import { PaginationModule } from 'src/common/pagination/pagination.module';
 
 @Module({
   controllers: [ProductsController],
-  providers: [ProductsService, UpdateProductProvider, CreateProductProvider, GetProductProvider, DeleteProductProvider],
+  providers: [
+    ProductsService,
+    UpdateProductProvider,
+    CreateProductProvider,
+    GetProductProvider,
+    DeleteProductProvider,
+  ],
   imports: [
     TypeOrmModule.forFeature([Product]),
     UsersModule,
     OrderProductModule,
+    PaginationModule,
   ],
   exports: [ProductsService],
 })

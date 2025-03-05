@@ -15,6 +15,7 @@ import { DeleteProductProvider } from './delete-product.provider';
 import { GetProductProvider } from './get-product.provider';
 import { UpdateProductProvider } from './update-product.provider';
 import { EntityManager, Repository } from 'typeorm';
+import { GetProductsDto } from '../dtos/getProducts.dto';
 
 @Injectable()
 export class ProductsService {
@@ -36,7 +37,7 @@ export class ProductsService {
     private readonly deleteProductProvider: DeleteProductProvider,
   ) {}
 
-  public async createProduct(@Body() createProductDto: CreateProductDto) {
+  public async createProduct(createProductDto: CreateProductDto) {
     return await this.createProductProvider.createProductProvider(
       createProductDto,
     );
@@ -45,8 +46,8 @@ export class ProductsService {
   public async getProductById(getProductParamsDto: GetProductParamsDto) {
     return this.getProductProvider.getProductById(getProductParamsDto);
   }
-  public async findAll() {
-    return this.getProductProvider.findAll();
+  public async findAll(productsQuery: GetProductsDto) {
+    return this.getProductProvider.findAll(productsQuery);
   }
   public async getProductByIdWithRelations(
     getProductParamsDto: GetProductParamsDto,
@@ -56,8 +57,8 @@ export class ProductsService {
     );
   }
   public async updateProduct(
-    @Param() getProductParamsDto: GetProductParamsDto,
-    @Body() updateProductDto: PatchProductDto,
+    getProductParamsDto: GetProductParamsDto,
+    updateProductDto: PatchProductDto,
   ) {
     return this.updateProductProvider.updateProduct(
       getProductParamsDto,

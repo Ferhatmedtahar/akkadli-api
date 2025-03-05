@@ -1,13 +1,14 @@
 import {
   BadRequestException,
   Injectable,
-  Param,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PaginationService } from 'src/common/pagination/pagination.service';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { Delivery } from '../delivery.entity';
+import { GetDeliveriesDto } from '../dtos/getDeliveries.dto';
 import { GetDeliveryParamsDto } from '../dtos/getDeliveryParams.dto';
 
 @Injectable()
@@ -18,10 +19,10 @@ export class GetDeliveryProvider {
     private readonly deliveryRepository: Repository<Delivery>,
     /**inject user service */
     private readonly usersService: UsersService,
+    /**inject pagination service */
+    private readonly paginationService: PaginationService,
   ) {}
-  public async findOneById(
-    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
-  ) {
+  public async findOneById(getDeliveryParamsDto: GetDeliveryParamsDto) {
     //get user id from request
     let user = undefined;
     let delivery = undefined;
@@ -64,7 +65,7 @@ export class GetDeliveryProvider {
     return delivery;
   }
 
-  public async findAllByUserId() {
+  public async findAllByUserId(deliveriesQuery: GetDeliveriesDto) {
     //get user id from request
     let user = undefined;
     let deliveries = undefined;
@@ -88,9 +89,15 @@ export class GetDeliveryProvider {
 
     //get all deliveries by user id
     try {
-      deliveries = await this.deliveryRepository.find({
-        where: { user: { id: user.id } },
-      });
+      const where = { user: { id: user.id } };
+      deliveries = await this.paginationService.paginateQuery(
+        deliveriesQuery,
+        this.deliveryRepository,
+        where,
+      );
+      // deliveries = await this.deliveryRepository.find({
+      //   where: { user: { id: user.id } },
+      // });
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',

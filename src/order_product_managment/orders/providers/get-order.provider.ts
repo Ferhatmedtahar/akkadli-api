@@ -5,11 +5,11 @@ import {
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
-import { ProductsService } from 'src/order_product_managment/products/providers/products.service';
+import { PaginationService } from 'src/common/pagination/pagination.service';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { GetOrderParamsDto } from '../dtos/getOrderParams.dto';
+import { GetOrdersDto } from '../dtos/getOrders.dto';
 import { Order } from '../order.entity';
 
 @Injectable()
@@ -18,13 +18,10 @@ export class GetOrderProvider {
     /**inject order repository */
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
-    /**inject product service */
-    private readonly productService: ProductsService,
-    /**inject order product service */
-    private readonly orderProductService: OrderProductService,
-
     /**inject user service */
     private readonly usersService: UsersService,
+    /**inject pagination service */
+    private readonly paginationService: PaginationService,
   ) {}
 
   public async getOrder(@Param() getOrderParamsDto: GetOrderParamsDto) {
@@ -70,7 +67,7 @@ export class GetOrderProvider {
     return order;
   }
 
-  public async getAllOrders() {
+  public async getAllOrders(ordersQuery: GetOrdersDto) {
     let orders = undefined;
     let user = undefined;
     try {
@@ -91,12 +88,16 @@ export class GetOrderProvider {
     }
 
     try {
-      orders = await this.orderRepository.find({
-        where: { user: { id: user.id } },
-        relations: {
-          orderProducts: { product: true },
-        },
-      });
+      const where = { user: { id: user.id } };
+      const relations = {
+        orderProducts: { product: true },
+      };
+      orders = await this.paginationService.paginateQuery(
+        ordersQuery,
+        this.orderRepository,
+        where,
+        relations,
+      );
       return orders;
     } catch {
       throw new RequestTimeoutException(

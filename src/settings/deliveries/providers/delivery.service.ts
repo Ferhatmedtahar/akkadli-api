@@ -10,15 +10,11 @@ import { GetDeliveryProvider } from './get-delivery.provider';
 import { UpdateDeliveryProvider } from './update-delivery.provider';
 import { GetDeliveryParamsDto } from '../dtos/getDeliveryParams.dto';
 import { PatchDeliveryDto } from '../dtos/patchDeliveries.dto';
+import { GetDeliveriesDto } from '../dtos/getDeliveries.dto';
 
 @Injectable()
 export class DeliveryService {
   constructor(
-    /**inject delivery repository */
-    @InjectRepository(Delivery)
-    private readonly deliveryRepository: Repository<Delivery>,
-    /**inject user service */
-    private readonly usersService: UsersService,
     /**inject create delivery provider */
     private readonly createDeliveryProvider: CreateDeliveryProvider,
     /**inject get delivery provider */
@@ -37,8 +33,8 @@ export class DeliveryService {
   ) {
     return this.getDeliveryProvider.findOneById(getDeliveryParamsDto);
   }
-  public async findAllByUserId() {
-    return this.getDeliveryProvider.findAllByUserId();
+  public async findAllByUserId(deliveriesQuery: GetDeliveriesDto) {
+    return this.getDeliveryProvider.findAllByUserId(deliveriesQuery);
   }
   public async updateDelivery(
     @Param() getDeliveryParamsDto: GetDeliveryParamsDto,

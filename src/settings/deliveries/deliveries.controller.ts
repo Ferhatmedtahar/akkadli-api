@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CreateDeliveryDto } from './dtos/createDeliveries.dto';
-import { DeliveryService } from './providers/delivery.service';
+import { GetDeliveriesDto } from './dtos/getDeliveries.dto';
 import { GetDeliveryParamsDto } from './dtos/getDeliveryParams.dto';
 import { PatchDeliveryDto } from './dtos/patchDeliveries.dto';
+import { DeliveryService } from './providers/delivery.service';
 
 @Controller('settings/deliveries')
 export class DeliveriesController {
@@ -25,8 +27,8 @@ export class DeliveriesController {
   }
 
   @Get()
-  public findAllByUserId() {
-    return this.deliveriesService.findAllByUserId();
+  public findAllByUserId(@Query() deliveriesQuery: GetDeliveriesDto) {
+    return this.deliveriesService.findAllByUserId(deliveriesQuery);
   }
 
   @Get('/:id')

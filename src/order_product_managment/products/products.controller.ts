@@ -6,9 +6,11 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CreateProductDto } from './dtos/createProduct.dto';
 import { GetProductParamsDto } from './dtos/getProductParams.dto';
+import { GetProductsDto } from './dtos/getProducts.dto';
 import { PatchProductDto } from './dtos/patchProduct.dto';
 import { ProductsService } from './providers/products.service';
 
@@ -19,8 +21,8 @@ export class ProductsController {
     private readonly productsService: ProductsService,
   ) {}
   @Get()
-  public getProducts() {
-    return this.productsService.findAll();
+  public getProducts(@Query() productsQuery: GetProductsDto) {
+    return this.productsService.findAll(productsQuery);
   }
 
   @Get(':id')

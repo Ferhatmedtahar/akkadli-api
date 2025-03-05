@@ -1,7 +1,7 @@
 POST http://localhost:3000/settings/deliveries
 Content-Type:application/json
 {
-"apiToken":"123456",
-"apiId":"123456",
-"name":"yalidine"
+"apiToken":"1234567",
+"apiId":"1234567",
+"name":"Yalidine"
 }

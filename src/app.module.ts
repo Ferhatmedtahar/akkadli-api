@@ -13,6 +13,7 @@ import { DeliveriesModule } from './settings/deliveries/deliveries.module';
 import { GeneralSettingsModule } from './settings/general-settings/general_settings.module';
 import { SettingsModule } from './settings/settings.module';
 import { UsersModule } from './users/users.module';
+import { PaginationModule } from './common/pagination/pagination.module';
 
 const ENV = process.env.NODE_ENV.trim();
 @Module({
@@ -48,6 +49,7 @@ const ENV = process.env.NODE_ENV.trim();
     AddressModule,
     GeneralSettingsModule,
     OrderProductModule,
+    PaginationModule,
   ],
   controllers: [],
   providers: [],

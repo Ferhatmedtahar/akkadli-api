@@ -10,15 +10,23 @@ import { GetOrderProvider } from './providers/get-order.provider';
 import { CreateOrderProvider } from './providers/create-order.provider';
 import { UpdateOrderProvider } from './providers/update-order.provider';
 import { DeleteOrderProvider } from './providers/delete-order.provider';
+import { PaginationModule } from 'src/common/pagination/pagination.module';
 
 @Module({
   controllers: [OrdersController],
-  providers: [OrdersService, GetOrderProvider, CreateOrderProvider, UpdateOrderProvider, DeleteOrderProvider],
+  providers: [
+    OrdersService,
+    GetOrderProvider,
+    CreateOrderProvider,
+    UpdateOrderProvider,
+    DeleteOrderProvider,
+  ],
   imports: [
     TypeOrmModule.forFeature([Order]),
     ProductsModule,
     OrderProductModule,
     UsersModule,
+    PaginationModule,
   ],
 })
 export class OrdersModule {}
