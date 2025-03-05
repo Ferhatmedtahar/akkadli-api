@@ -1,14 +1,13 @@
 POST http://localhost:3000/products
 Content-Type:application/json
 {
-    "productName": "fa111ns",
-    "description": "This is dell laptop",
-    "color": "black",
-    "size": "small",
+    "productName": "cadre",
+    "description": "cadre of flowers",
+    "color": "red",
+    "size": "medium",
     "heavyWeight": false,
     "price": 100,
-    "discount": 0,
-    "quantity": 10,
-    "totalProductsSold": 0,
+    "discount": 0.2,
+    "quantity": 30,
     "imageUrl": "https://example.com/image.jpg"
 }

@@ -114,6 +114,7 @@ export class UpdateProductProvider {
       'heavyWeight',
       'size',
       'color',
+      'totalProductsSold',
     ];
 
     // 6. Ensure only allowed fields are updated

@@ -105,17 +105,6 @@ export class CreateProductDto {
   @IsNotEmpty()
   quantity: number;
 
-  @ApiProperty({
-    title: 'totalProductsSold',
-    description: 'total products sold',
-    example: 10,
-    default: 0,
-    required: true,
-    type: 'number',
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  totalProductsSold: number;
   @ApiPropertyOptional({
     title: 'imageUrl',
     description: 'image url of the product',

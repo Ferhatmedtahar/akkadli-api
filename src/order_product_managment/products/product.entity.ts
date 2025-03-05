@@ -1,3 +1,4 @@
+import { User } from 'src/users/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -10,7 +11,6 @@ import {
 } from 'typeorm';
 import { OrderProduct } from '../order-product/order-product.entity';
 import { ProductSize } from './enums/productSize';
-import { User } from 'src/users/user.entity';
 
 @Entity()
 export class Product {

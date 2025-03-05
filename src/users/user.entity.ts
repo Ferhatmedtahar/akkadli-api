@@ -50,13 +50,13 @@ export class User {
 
   @OneToOne(() => Address, (address) => address.user, {
     cascade: true,
-    eager: true,
+    // eager: true,
   })
   address?: Address;
 
   @OneToOne(() => GeneralSettings, (generalSettings) => generalSettings.user, {
     cascade: true,
-    eager: true,
+    // eager: true,
   })
   generalSettings?: GeneralSettings;
 

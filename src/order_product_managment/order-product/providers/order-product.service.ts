@@ -22,7 +22,7 @@ export class OrderProductService {
 
     return result.total ? Number(result.total) : 0;
   }
-  public async createOrderProductProvider(
+  public createOrderProductProvider(
     createOrderProviderDto: CreateOrderProviderDto,
   ) {
     return this.orderProductRepository.create({

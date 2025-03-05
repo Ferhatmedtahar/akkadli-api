@@ -67,6 +67,7 @@ export class GetOrderProvider {
         description: 'order could not be found using the provided id',
       });
     }
+    return order;
   }
 
   public async getAllOrders() {

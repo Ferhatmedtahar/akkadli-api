@@ -2,380 +2,453 @@ import {
   BadRequestException,
   Body,
   Injectable,
+  InternalServerErrorException,
+  Logger,
   NotFoundException,
   Param,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { OrderProduct } from 'src/order_product_managment/order-product/order-product.entity';
 import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
+import { Product } from 'src/order_product_managment/products/product.entity';
 import { ProductsService } from 'src/order_product_managment/products/providers/products.service';
 import { UsersService } from 'src/users/providers/users.service';
-import { Repository } from 'typeorm';
+import { User } from 'src/users/user.entity';
+import { DataSource, Repository } from 'typeorm';
 import { GetOrderParamsDto } from '../dtos/getOrderParams.dto';
 import { PatchOrderDto } from '../dtos/patchOrder.dto';
 import { OrderStatus } from '../enums/orderStatus.enum';
 import { Order } from '../order.entity';
+
 @Injectable()
 export class UpdateOrderProvider {
+  private readonly logger = new Logger(UpdateOrderProvider.name);
+
   constructor(
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
     private readonly productService: ProductsService,
     private readonly orderProductService: OrderProductService,
     private readonly usersService: UsersService,
+    private readonly dataSource: DataSource, // Inject DataSource for transactions
   ) {}
 
   public async updateOrder(
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @Body() patchOrderDto: PatchOrderDto,
   ) {
-    // Step 1: Get the user, order, and orderProducts
-    const user = await this.usersService.findUserById(19);
-    const order = await this.orderRepository.findOne({
-      where: { id: getOrderParamsDto.id, user: { id: user.id } },
-      relations: { orderProducts: true },
-    });
-    if (!order) {
-      throw new NotFoundException(
-        `Order with ID ${getOrderParamsDto.id} not found`,
-      );
-    }
-    if (order.status !== OrderStatus.PENDING) {
-      throw new BadRequestException('Only pending orders can be updated');
-    }
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    // Step 2: Update the Order entity
-    order.customerName = patchOrderDto.customerName ?? order.customerName;
-    order.phoneNumber = patchOrderDto.phoneNumber ?? order.phoneNumber;
-    order.address = patchOrderDto.address ?? order.address;
-    order.status = patchOrderDto.status ?? order.status;
-    order.isExternal = patchOrderDto.isExternal ?? order.isExternal;
-    order.externalTrackingId =
-      patchOrderDto.externalTrackingId ?? order.externalTrackingId;
-
-    // Step 3: Handle product updates if provided
-    if (patchOrderDto.products && patchOrderDto.products.length > 0) {
-      const existingOrderProducts =
-        await this.orderProductService.findByOrderId(getOrderParamsDto.id);
-      const existingProductIds = existingOrderProducts.map(
-        (op) => op.product.id,
-      );
-      const requestedProductIds = patchOrderDto.products.map(
-        (p) => p.productId,
-      );
-
-      // Find products to remove
-      const productsToRemove = existingOrderProducts.filter(
-        (op) => !requestedProductIds.includes(op.product.id),
-      );
-
-      // Find products to add or update
-      const productsToAddOrUpdate = patchOrderDto.products;
-
-      // Step 3.1: Remove products and revert Product quantities
-      for (const op of productsToRemove) {
-        const product = await this.productService.getProductById({
-          id: op.product.id,
+    try {
+      // Step 1: Get the user
+      let user: User;
+      try {
+        user = await queryRunner.manager.findOne(User, { where: { id: 19 } }); // Replace with auth later
+        this.logger.log('User fetched successfully for order update:', {
+          userId: 19,
         });
-        product.quantity += op.quantity; // Return stock
-        product.totalProductsSold -= op.quantity; // Reduce sold count
-        await this.productService.updateProductFromOrder(product); // Fixed method name
-        await this.orderProductService.removeOrderProduct(op.id);
+      } catch (error) {
+        this.logger.error(
+          'Failed to fetch user: Database connection error',
+          error.stack || error.message || 'No stack trace available',
+        );
+        throw new InternalServerErrorException(
+          'Database connection failed, please try again later',
+          { description: 'Error fetching user from the database' },
+        );
       }
 
-      // Step 3.2: Add new products or update existing ones
-      for (const p of productsToAddOrUpdate) {
-        const product = await this.productService.getProductByIdWithRelations({
-          id: p.productId,
+      if (!user) {
+        this.logger.warn('User not found for ID 19');
+        throw new NotFoundException('User not found', {
+          description: 'User does not exist in the database',
         });
-        if (!product) {
-          throw new NotFoundException(
-            `Product with ID ${p.productId} not found`,
+      }
+
+      // Step 2: Get the order and its orderProducts
+      let order: Order;
+      try {
+        order = await queryRunner.manager.findOne(Order, {
+          where: { id: getOrderParamsDto.id, user: { id: user.id } },
+          relations: { orderProducts: true },
+        });
+        this.logger.log('Order fetched successfully for update:', {
+          orderId: getOrderParamsDto.id,
+        });
+      } catch (error) {
+        this.logger.error(
+          'Failed to fetch order: Database error',
+          error.stack || error.message || 'No stack trace available',
+        );
+        throw new InternalServerErrorException(
+          'Failed to retrieve order, please try again later',
+          { description: 'Error querying the database for order' },
+        );
+      }
+
+      if (!order) {
+        this.logger.warn('Order not found or not owned by user:', {
+          orderId: getOrderParamsDto.id,
+          userId: user.id,
+        });
+        throw new NotFoundException(
+          `Order with ID ${getOrderParamsDto.id} not found`,
+          {
+            description: 'Order does not exist or does not belong to the user',
+          },
+        );
+      }
+
+      if (order.status !== OrderStatus.PENDING) {
+        this.logger.warn('Order status prevents update:', {
+          orderId: getOrderParamsDto.id,
+          status: order.status,
+        });
+        throw new BadRequestException('Only pending orders can be updated');
+      }
+
+      // Step 3: Update the Order entity
+      order.customerName = patchOrderDto.customerName ?? order.customerName;
+      order.phoneNumber = patchOrderDto.phoneNumber ?? order.phoneNumber;
+      order.address = patchOrderDto.address ?? order.address;
+      order.status = patchOrderDto.status ?? order.status;
+      order.isExternal = patchOrderDto.isExternal ?? order.isExternal;
+      order.externalTrackingId =
+        patchOrderDto.externalTrackingId ?? order.externalTrackingId;
+
+      // Step 4: Handle product updates if provided
+      if (patchOrderDto.products && patchOrderDto.products.length > 0) {
+        let existingOrderProducts: OrderProduct[];
+        try {
+          existingOrderProducts = await queryRunner.manager.find(OrderProduct, {
+            where: { order: { id: getOrderParamsDto.id } },
+            relations: ['product'], // Ensure product relation is loaded
+          });
+          this.logger.log('Existing OrderProducts fetched:', {
+            count: existingOrderProducts.length,
+          });
+        } catch (error) {
+          this.logger.error(
+            'Failed to fetch existing OrderProducts: Database error',
+            error.stack || error.message || 'No stack trace available',
+          );
+          throw new InternalServerErrorException(
+            'Failed to retrieve existing order products, please try again later',
+            { description: 'Error querying existing order products' },
           );
         }
 
-        const existingOrderProduct = existingOrderProducts.find(
-          (op) => op.product.id === p.productId,
+        const existingProductIds = existingOrderProducts.map(
+          (op) => op.product.id,
+        );
+        const requestedProductIds = patchOrderDto.products.map(
+          (p) => p.productId,
         );
 
-        if (existingOrderProduct) {
-          // Update existing OrderProduct
-          const quantityDiff = p.quantity - existingOrderProduct.quantity;
-          if (quantityDiff !== 0) {
-            if (quantityDiff > product.quantity) {
+        // Find products to remove
+        const productsToRemove = existingOrderProducts.filter(
+          (op) => !requestedProductIds.includes(op.product.id),
+        );
+
+        // Find products to add or update
+        const productsToAddOrUpdate = patchOrderDto.products;
+
+        // Step 4.1: Remove products and revert Product quantities
+        for (const op of productsToRemove) {
+          const product = op.product; // Already loaded via relations
+          if (!product) {
+            throw new NotFoundException(
+              `Product with ID ${op.product.id} not found`,
+            );
+          }
+          product.quantity += op.quantity; // Return stock
+          product.totalProductsSold -= op.quantity; // Reduce sold count
+          try {
+            await this.productService.updateProductFromOrder(
+              product,
+              queryRunner.manager,
+            );
+            this.logger.log('Product quantity reverted successfully:', {
+              productId: product.id,
+            });
+          } catch (error) {
+            this.logger.error(
+              'Failed to revert product quantity: Database error',
+              error.stack || error.message || 'No stack trace available',
+            );
+            throw new InternalServerErrorException(
+              'Could not revert product quantity during order update',
+              { description: 'Error updating product inventory' },
+            );
+          }
+
+          try {
+            await queryRunner.manager.remove(op);
+            this.logger.log('OrderProduct removed successfully:', {
+              orderProductId: op.id,
+            });
+          } catch (error) {
+            this.logger.error(
+              'Failed to remove OrderProduct: Database error',
+              error.stack || error.message || 'No stack trace available',
+            );
+            throw new InternalServerErrorException(
+              'Failed to remove order product, please try again later',
+              { description: 'Error removing order product' },
+            );
+          }
+        }
+
+        // Step 4.2: Add new products or update existing ones
+        for (const p of productsToAddOrUpdate) {
+          let product: Product;
+          try {
+            product = await queryRunner.manager.findOne(Product, {
+              where: { id: p.productId },
+            });
+            this.logger.log('Product fetched for order update:', {
+              productId: p.productId,
+            });
+          } catch (error) {
+            this.logger.error(
+              'Failed to fetch product: Database error',
+              error.stack || error.message || 'No stack trace available',
+            );
+            throw new InternalServerErrorException(
+              'Failed to retrieve product, please try again later',
+              { description: 'Error querying the database for product' },
+            );
+          }
+
+          if (!product) {
+            this.logger.warn('Product not found:', { productId: p.productId });
+            throw new NotFoundException(
+              `Product with ID ${p.productId} not found`,
+              {
+                description: 'Product does not exist in the database',
+              },
+            );
+          }
+
+          const existingOrderProduct = existingOrderProducts.find(
+            (op) => op.product.id === p.productId,
+          );
+
+          if (existingOrderProduct) {
+            // Update existing OrderProduct
+            const quantityDiff = p.quantity - existingOrderProduct.quantity;
+            this.logger.log('Updating existing OrderProduct:', {
+              orderProductId: existingOrderProduct.id,
+              currentQuantity: existingOrderProduct.quantity,
+              newQuantity: p.quantity,
+              quantityDiff: quantityDiff,
+              productId: p.productId,
+            });
+
+            if (quantityDiff !== 0) {
+              if (quantityDiff > 0) {
+                // Increasing quantity
+                if (quantityDiff > product.quantity) {
+                  this.logger.warn('Insufficient stock for product update:', {
+                    productId: p.productId,
+                    requested: quantityDiff,
+                    available: product.quantity,
+                  });
+                  throw new BadRequestException(
+                    `Insufficient stock for product ${p.productId} (${product.quantity} available)`,
+                  );
+                }
+              } else {
+                // Decreasing quantity (quantityDiff < 0)
+                if (product.quantity + quantityDiff < 0) {
+                  throw new BadRequestException(
+                    `Cannot decrease quantity below 0 for product ${p.productId}`,
+                  );
+                }
+              }
+              this.logger.log('Product before update:', {
+                productId: product.id,
+                quantity: product.quantity,
+                totalProductsSold: product.totalProductsSold,
+              });
+              product.quantity -= quantityDiff; // Adjust stock (positive or negative diff)
+              product.totalProductsSold += quantityDiff; // Adjust sold count
+              const discountedPrice = product.discount
+                ? product.price * (1 - product.discount)
+                : product.price;
+              try {
+                await this.productService.updateProductFromOrder(
+                  product,
+                  queryRunner.manager,
+                );
+                this.logger.log('Product quantity updated successfully:', {
+                  productId: product.id,
+                  quantity: product.quantity,
+                  totalProductsSold: product.totalProductsSold,
+                });
+              } catch (error) {
+                this.logger.error(
+                  'Failed to update product quantity: Database error',
+                  error.stack || error.message || 'No stack trace available',
+                );
+                throw new InternalServerErrorException(
+                  'Could not update product quantity during order update',
+                  { description: 'Error updating product inventory' },
+                );
+              }
+
+              existingOrderProduct.quantity = p.quantity;
+              existingOrderProduct.priceAtPurchase = discountedPrice; // Recalculate priceAtPurchase
+              this.logger.log('OrderProduct before save:', {
+                orderProductId: existingOrderProduct.id,
+                quantity: existingOrderProduct.quantity,
+                priceAtPurchase: existingOrderProduct.priceAtPurchase,
+              });
+              try {
+                const updatedOrderProduct = await queryRunner.manager.merge(
+                  OrderProduct,
+                  existingOrderProduct,
+                  {
+                    quantity: p.quantity,
+                    priceAtPurchase: discountedPrice,
+                  },
+                );
+                const savedOrderProduct =
+                  await queryRunner.manager.save(updatedOrderProduct);
+                this.logger.log('OrderProduct updated successfully:', {
+                  orderProductId: savedOrderProduct.id,
+                  quantity: savedOrderProduct.quantity,
+                  priceAtPurchase: savedOrderProduct.priceAtPurchase,
+                });
+              } catch (error) {
+                this.logger.error(
+                  'Failed to update OrderProduct: Database error',
+                  error.stack || error.message || 'No stack trace available',
+                );
+                throw new InternalServerErrorException(
+                  'Failed to update order product, please try again later',
+                  { description: 'Error updating order product' },
+                );
+              }
+
+              // Reload order to ensure orderProducts reflect the update
+              try {
+                order = await queryRunner.manager.findOne(Order, {
+                  where: { id: getOrderParamsDto.id },
+                  relations: { orderProducts: true },
+                });
+                this.logger.log('Order reloaded with updated orderProducts:', {
+                  orderId: order.id,
+                  orderProducts: order.orderProducts.map((op) => ({
+                    id: op.id,
+                    quantity: op.quantity,
+                    priceAtPurchase: op.priceAtPurchase,
+                  })),
+                });
+              } catch (error) {
+                this.logger.error(
+                  'Failed to reload order: Database error',
+                  error.stack || error.message || 'No stack trace available',
+                );
+                throw new InternalServerErrorException(
+                  'Failed to reload order, please try again later',
+                  {
+                    description:
+                      'Error reloading order with updated orderProducts',
+                  },
+                );
+              }
+            }
+          } else {
+            // Add new OrderProduct
+            if (p.quantity > product.quantity) {
+              this.logger.warn('Insufficient stock for new product:', {
+                productId: p.productId,
+                requested: p.quantity,
+                available: product.quantity,
+              });
               throw new BadRequestException(
                 `Insufficient stock for product ${p.productId} (${product.quantity} available)`,
               );
             }
-            product.quantity -= quantityDiff; // Reduce/increase stock
-            product.totalProductsSold += quantityDiff; // Adjust sold count
-            await this.productService.updateProductFromOrder(product);
+            product.quantity -= p.quantity;
+            product.totalProductsSold += p.quantity;
+            try {
+              await this.productService.updateProductFromOrder(
+                product,
+                queryRunner.manager,
+              );
+              this.logger.log(
+                'Product quantity reduced for new OrderProduct:',
+                { productId: product.id },
+              );
+            } catch (error) {
+              this.logger.error(
+                'Failed to reduce product quantity: Database error',
+                error.stack || error.message || 'No stack trace available',
+              );
+              throw new InternalServerErrorException(
+                'Could not reduce product quantity during order update',
+                { description: 'Error updating product inventory' },
+              );
+            }
 
-            existingOrderProduct.quantity = p.quantity;
-            await this.orderProductService.updateOrderProductProvider(
-              existingOrderProduct,
-            );
+            const orderProductToCreate =
+              this.orderProductService.createOrderProductProvider({
+                order,
+                product,
+                quantity: p.quantity,
+                priceAtPurchase: product.price, // Use the current price
+              });
+            try {
+              await queryRunner.manager.save(orderProductToCreate);
+              this.logger.log('New OrderProduct created successfully:', {
+                orderProductId: orderProductToCreate.id,
+              });
+            } catch (error) {
+              this.logger.error(
+                'Failed to create new OrderProduct: Database error',
+                error.stack || error.message || 'No stack trace available',
+              );
+              throw new InternalServerErrorException(
+                'Failed to create new order product, please try again later',
+                { description: 'Error creating order product' },
+              );
+            }
           }
-        } else {
-          // Add new OrderProduct
-          if (p.quantity > product.quantity) {
-            throw new BadRequestException(
-              `Insufficient stock for product ${p.productId} (${product.quantity} available)`,
-            );
-          }
-          product.quantity -= p.quantity;
-          product.totalProductsSold += p.quantity;
-          await this.productService.updateProductFromOrder(product);
-
-          const orderProductToCreate =
-            await this.orderProductService.createOrderProductProvider({
-              order,
-              product,
-              quantity: p.quantity,
-              priceAtPurchase: product.price, // Use the current price
-            });
-          await this.orderProductService.saveOrderProduct([
-            orderProductToCreate,
-          ]);
         }
       }
-    }
 
-    // Step 4: Save the updated order
-    const savedOrder = await this.orderRepository.save(order);
-    return { message: 'Order updated successfully', order: savedOrder };
+      // Step 5: Save the updated order
+      try {
+        const savedOrder = await queryRunner.manager.save(order);
+        this.logger.log('Order updated successfully:', {
+          orderId: savedOrder.id,
+        });
+        await queryRunner.commitTransaction();
+        return { message: 'Order updated successfully', order: savedOrder };
+      } catch (error) {
+        this.logger.error(
+          'Failed to save updated order: Database error',
+          error.stack || error.message || 'No stack trace available',
+        );
+        throw new InternalServerErrorException(
+          'Failed to save updated order, please try again later',
+          { description: 'Error saving updated order to the database' },
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        'Transaction failed for order update, rolling back',
+        error.stack || error.message || 'No stack trace available',
+      );
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+      this.logger.log('Query runner released');
+    }
   }
 }
-// @Injectable()
-// export class UpdateOrderProvider {
-//   constructor(
-//     /**inject order repository */
-//     @InjectRepository(Order)
-//     private orderRepository: Repository<Order>,
-//     /**inject product service */
-//     private readonly productService: ProductsService,
-//     /**inject order product service */
-//     private readonly orderProductService: OrderProductService,
-
-//     /**inject user service */
-//     private readonly usersService: UsersService,
-//   ) {}
-//   public async updateOrder(
-//     @Param() getOrderParamsDto: GetOrderParamsDto,
-//     @Body() patchOrderDto: PatchOrderDto,
-//   ) {
-//     // Step 1 : Get the user , order and orderProducts
-//     const user = await this.usersService.findUserById(19);
-//     const order = await this.orderRepository.findOne({
-//       where: { id: getOrderParamsDto.id, user: { id: user.id } },
-//       relations: {
-//         orderProducts: true,
-//       },
-//     });
-//     if (!order)
-//       throw new NotFoundException(
-//         `Order with ID ${getOrderParamsDto.id} not found`,
-//       );
-//     if (order.status !== OrderStatus.PENDING)
-//       throw new BadRequestException('Only pending orders can be updated');
-
-//     // Step 2: update the Order entity
-//     order.customerName = patchOrderDto.customerName ?? order.customerName;
-//     order.phoneNumber = patchOrderDto.phoneNumber ?? order.phoneNumber;
-//     order.address = patchOrderDto.address ?? order.address;
-//     order.status = patchOrderDto.status ?? order.status;
-//     order.isExternal = patchOrderDto.isExternal ?? order.isExternal;
-//     order.externalTrackingId =
-//       patchOrderDto.externalTrackingId ?? order.externalTrackingId;
-
-//     //should call diff provider for each external order
-//     // Step 3: save the order after changes
-//     if (patchOrderDto.products.length === 0) {
-//       const savedOrder = await this.orderRepository.save(order);
-//       return savedOrder;
-//     }
-//     const existingOrderProducts = await this.orderProductService.findByOrderId(
-//       getOrderParamsDto.id,
-//     );
-//     const existingProductIds = existingOrderProducts.map((op) => op.product.id);
-//     const requestedProductIds = patchOrderDto.products.map((p) => p.productId);
-
-//     // Find products to remove
-//     const productsToRemove = existingOrderProducts.filter(
-//       (op) => !requestedProductIds.includes(op.product.id),
-//     );
-
-//     // Find products to add or update
-//     const productsToAddOrUpdate = patchOrderDto.products;
-
-//     // Step 3.1: Remove products and revert Product quantities
-//     for (const op of productsToRemove) {
-//       const product = await this.productService.getProductById({
-//         id: op.product.id,
-//       });
-//       product.quantity += op.quantity; // Return stock
-//       product.totalProductsSold -= op.quantity; // Reduce sold count
-//       await this.productService.updateProductfromOrder(product);
-//       await this.orderProductService.removeOrderProduct(op.id);
-//     }
-
-//     // Step 3.2: Add new products or update existing ones
-//     for (const p of productsToAddOrUpdate) {
-//       const product = await this.productService.getProductByIdWithRelations({
-//         id: p.productId,
-//       });
-//       if (!product)
-//         throw new NotFoundException(`Product with ID ${p.productId} not found`);
-
-//       const existingOrderProduct = existingOrderProducts.find(
-//         (op) => op.product.id === p.productId,
-//       );
-
-//       if (existingOrderProduct) {
-//         // Update existing OrderProduct
-//         const quantityDiff = p.quantity - existingOrderProduct.quantity;
-//         if (quantityDiff !== 0) {
-//           if (quantityDiff > product.quantity) {
-//             throw new BadRequestException(
-//               `Insufficient stock for product ${p.productId} (${product.quantity} available)`,
-//             );
-//           }
-//           product.quantity -= quantityDiff; // Reduce/increase stock
-//           product.totalProductsSold += quantityDiff; // Adjust sold count
-//           await this.productService.updateProductfromOrder(product);
-
-//           existingOrderProduct.quantity = p.quantity;
-//           await this.orderProductService.updateOrderProductProvider(
-//             existingOrderProduct,
-//           );
-//         } else {
-//           // Add new OrderProduct
-//           if (p.quantity > product.quantity) {
-//             throw new BadRequestException(
-//               `Insufficient stock for product ${p.productId} (${product.quantity} available)`,
-//             );
-//           }
-//           product.quantity -= p.quantity;
-//           product.totalProductsSold += p.quantity;
-//           await this.productService.updateProductfromOrder(product);
-
-//           // Add new order product
-//           const orderProductToCreate =
-//             await this.orderProductService.createOrderProductProvider({
-//               order,
-//               product,
-//               quantity: p.quantity,
-//               priceAtPurchase: product.price, // Use the current price
-//             });
-
-//           await this.orderProductService.saveOrderProduct([
-//             orderProductToCreate,
-//           ]);
-//         }
-//       }
-//       return { message: 'Order updated successfully', order };
-//     }
-//   }
-// }
-
-// import {
-//   BadRequestException,
-//   Body,
-//   Injectable,
-//   NotFoundException,
-//   Param,
-// } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
-// import { ProductsService } from 'src/order_product_managment/products/providers/products.service';
-// import { UsersService } from 'src/users/providers/users.service';
-// import { Repository } from 'typeorm';
-// import { GetOrderParamsDto } from '../dtos/getOrderParams.dto';
-// import { PatchOrderDto } from '../dtos/patchOrder.dto';
-// import { Order } from '../order.entity';
-
-// @Injectable()
-// export class UpdateOrderProvider {
-//   constructor(
-//     /**inject order repository */
-//     @InjectRepository(Order)
-//     private orderRepository: Repository<Order>,
-//     /**inject product service */
-//     private readonly productService: ProductsService,
-//     /**inject order product service */
-//     private readonly orderProductService: OrderProductService,
-
-//     /**inject user service */
-//     private readonly usersService: UsersService,
-//   ) {}
-//   public async updateOrder(
-//     @Param() getOrderParamsDto: GetOrderParamsDto,
-//     @Body() patchOrderDto: PatchOrderDto,
-//   ) {
-//     // Step 1 : Get the user , order and orderProducts
-//     const user = await this.usersService.findUserById(19);
-//     const order = await this.orderRepository.findOne({
-//       where: { id: getOrderParamsDto.id, user: { id: user.id } },
-//       relations: {
-//         orderProducts: true,
-//       },
-//     });
-//     if (!order)
-//       throw new NotFoundException(
-//         `Order with ID ${getOrderParamsDto.id} not found`,
-//       );
-//     if (order.status !== 'pending')
-//       throw new BadRequestException('Only pending orders can be updated');
-
-//     // Step 2: update the Order entity
-//     order.customerName = patchOrderDto.customerName ?? order.customerName;
-//     order.phoneNumber = patchOrderDto.phoneNumber ?? order.phoneNumber;
-//     order.address = patchOrderDto.address ?? order.address;
-//     order.status = patchOrderDto.status ?? order.status;
-//     order.isExternal = patchOrderDto.isExternal ?? order.isExternal;
-//     order.externalTrackingId =
-//       patchOrderDto.externalTrackingId ?? order.externalTrackingId;
-
-//     //should call diff provider for each external order
-//     // Step 3: save the order after changes
-
-//     const savedOrder = await this.orderRepository.save(order);
-
-//     // Step 4: Create and link OrderProduct entries
-
-//     const orderProducts = await Promise.all(
-//       patchOrderDto.products.map(async (p) => {
-//         const product = await this.productService.getProductByIdWithRelations({
-//           id: p.productId,
-//         });
-
-//         if (!product) {
-//           throw new NotFoundException(
-//             `Product with id ${p.productId} not found`,
-//           );
-//         }
-//         return this.orderProductService.createOrderProductProvider({
-//           order: savedOrder,
-//           product,
-//           quantity: p.quantity,
-//           priceAtPurchase: p.quantity,
-//         });
-//         // const orderProduct =
-//         //   this.orderProductService.updateOrderProductProvider({
-//         //     order: savedOrder,
-//         //     product,
-
-//         //     quantity: p.quantity,
-//         //   });
-
-//         // return orderProduct;
-//       }),
-//     );
-
-//     // Step 5: Save all OrderProduct entries
-//     this.orderProductService.saveOrderProduct(orderProducts);
-
-//     // Step 6: Return the order with its orderProducts
-//     savedOrder.orderProducts = orderProducts;
-//     return savedOrder;
-//   }
-// }
