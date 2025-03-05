@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { GetOrderParamsDto } from '../dtos/getOrderParams.dto';
 import { GetOrdersDto } from '../dtos/getOrders.dto';
 import { Order } from '../order.entity';
+import { Paginated } from 'src/common/pagination/interfaces/paginated.interface';
 
 @Injectable()
 export class GetOrderProvider {
@@ -67,7 +68,9 @@ export class GetOrderProvider {
     return order;
   }
 
-  public async getAllOrders(ordersQuery: GetOrdersDto) {
+  public async getAllOrders(
+    ordersQuery: GetOrdersDto,
+  ): Promise<Paginated<Order>> {
     let orders = undefined;
     let user = undefined;
     try {

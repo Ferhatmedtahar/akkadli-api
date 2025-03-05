@@ -4,6 +4,7 @@ import {
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Paginated } from 'src/common/pagination/interfaces/paginated.interface';
 import { PaginationService } from 'src/common/pagination/pagination.service';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
@@ -65,7 +66,9 @@ export class GetDeliveryProvider {
     return delivery;
   }
 
-  public async findAllByUserId(deliveriesQuery: GetDeliveriesDto) {
+  public async findAllByUserId(
+    deliveriesQuery: GetDeliveriesDto,
+  ): Promise<Paginated<Delivery>> {
     //get user id from request
     let user = undefined;
     let deliveries = undefined;

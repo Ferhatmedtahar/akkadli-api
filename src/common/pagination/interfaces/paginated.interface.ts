@@ -8,7 +8,7 @@ export interface Paginated<T> {
   };
   links: {
     first: string;
-    prev: string;
+    prevous: string;
     current: string;
     next: string;
     last: string;

@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { GetProductParamsDto } from '../dtos/getProductParams.dto';
 import { GetProductsDto } from '../dtos/getProducts.dto';
 import { Product } from '../product.entity';
+import { Paginated } from 'src/common/pagination/interfaces/paginated.interface';
 
 @Injectable()
 export class GetProductProvider {
@@ -70,7 +71,9 @@ export class GetProductProvider {
 
     return product;
   }
-  public async findAll(productsQuery: GetProductsDto) {
+  public async findAll(
+    productsQuery: GetProductsDto,
+  ): Promise<Paginated<Product>> {
     //find a user and check if it exist in db
     //TODO later change the user to the current user on the requuest
     let user = undefined;
