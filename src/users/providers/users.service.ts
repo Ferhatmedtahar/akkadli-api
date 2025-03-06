@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthService } from 'src/auth/providers/auth/auth.service';
+import { AuthService } from 'src/auth/providers/auth.service';
 import { defaultAddress } from 'src/settings/addresses/constants/defaultAddress.const';
 import { defaultGeneralSettings } from 'src/settings/general-settings/constants/defaultGeneralSettings.const';
 import { Repository } from 'typeorm';
