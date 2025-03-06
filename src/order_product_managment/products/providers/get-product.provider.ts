@@ -75,7 +75,8 @@ export class GetProductProvider {
     productsQuery: GetProductsDto,
   ): Promise<Paginated<Product>> {
     //find a user and check if it exist in db
-    //TODO later change the user to the current user on the requuest
+    //TODO later change the user to the current user on the request
+
     let user = undefined;
     let products = undefined;
     try {

@@ -15,10 +15,12 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { authType } from 'src/auth/enums/auth-type.enum';
 import { CreateUserDto } from './dtos/createUser.dto';
+import { GetUserParamsDto } from './dtos/getUserParams.dto';
 import { PatchUserDto } from './dtos/patchUser.dto';
 import { UsersService } from './providers/users.service';
-import { GetUserParamsDto } from './dtos/getUserParams.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -35,6 +37,7 @@ export class UsersController {
     return this.usersService.findUserById(id);
   }
   @Post()
+  @Auth(authType.None)
   @ApiOperation({ summary: 'create user' })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: 'user created' })

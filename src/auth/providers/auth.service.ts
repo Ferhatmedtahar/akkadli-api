@@ -1,15 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
-import jwtConfig from '../config/jwt.config';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable } from '@nestjs/common';
+import { RefreshTokenDto } from '../dtos/refresh-token.dto';
+import { RefreshTokenProvider } from './refresh-token.provider';
 
 @Injectable()
 export class AuthService {
   constructor(
-    /**inject jwt config */
-    @Inject(jwtConfig.KEY)
-    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
-    /**inject jwt service */
-    private readonly jwtService: JwtService,
+    /**inject refresh token provider */
+    private readonly refreshTokenProvider: RefreshTokenProvider,
   ) {}
+  public async refreshToken(refreshTokendto: RefreshTokenDto) {
+    return this.refreshTokenProvider.refreshToken(refreshTokendto);
+  }
 }

@@ -8,6 +8,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
+import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { CreateProductDto } from './dtos/createProduct.dto';
 import { GetProductParamsDto } from './dtos/getProductParams.dto';
 import { GetProductsDto } from './dtos/getProducts.dto';
@@ -20,8 +22,13 @@ export class ProductsController {
     /**inject products service */
     private readonly productsService: ProductsService,
   ) {}
+  // @Auth(authType.None)
   @Get()
-  public getProducts(@Query() productsQuery: GetProductsDto) {
+  public getProducts(
+    @Query() productsQuery: GetProductsDto,
+    @ActiveUser() user: ActiveUserData,
+  ) {
+    console.log(user);
     return this.productsService.findAll(productsQuery);
   }
 

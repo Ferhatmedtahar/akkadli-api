@@ -1,3 +1,4 @@
 GET http://localhost:3000/products/6
 
 GET http://localhost:3000/products?page=2&limit=3
+Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIxLCJlbWFpbCI6ImZlcmhhdG1lZHRhaGFyMjBAZ21haWwuY29tIiwiaWF0IjoxNzQxMjcyOTkyLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAifQ.x7WKbLyOUbZYFNh3qfTpaxfO9AdnD6rbB2BlPd9-lKI

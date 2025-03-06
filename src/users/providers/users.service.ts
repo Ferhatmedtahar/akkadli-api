@@ -10,8 +10,11 @@ import {
   Param,
   RequestTimeoutException,
 } from '@nestjs/common';
-import { ConfigService, ConfigType } from '@nestjs/config';
+import { ConfigType } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import jwtConfig from 'src/auth/config/jwt.config';
+import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { AuthService } from 'src/auth/providers/auth.service';
 import { defaultAddress } from 'src/settings/addresses/constants/defaultAddress.const';
 import { defaultGeneralSettings } from 'src/settings/general-settings/constants/defaultGeneralSettings.const';
@@ -34,8 +37,11 @@ export class UsersService {
     /**inject user repository */
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    /**inject config service */
-    private readonly configService: ConfigService,
+    /**inject jwtService */
+    private readonly jwtService: JwtService,
+    /**inject jwt config  */
+    @Inject(jwtConfig.KEY)
+    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
 
   public async findUserById(id: number): Promise<User> {
@@ -116,6 +122,19 @@ export class UsersService {
         },
       );
     }
+
+    return await this.jwtService.signAsync(
+      {
+        sub: newUser.id,
+        email: newUser.email,
+      } as ActiveUserData,
+      {
+        secret: this.jwtConfiguration.secret,
+        audience: this.jwtConfiguration.tokenAudience,
+        issuer: this.jwtConfiguration.tokenIssuer,
+        expiresIn: this.jwtConfiguration.accessTokenTTL,
+      },
+    );
   }
 
   public async delete(@Param() getUserParamsDto: GetUserParamsDto) {
