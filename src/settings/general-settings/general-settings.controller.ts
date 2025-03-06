@@ -8,7 +8,7 @@ export class GeneralSettingsController {
     /**inject general settings service */
     private readonly generalSettingsService: GeneralSettingsService,
   ) {}
-
+  // @UseGuards(AccessTokenGuard)
   @Get()
   public async getGeneralSettings() {
     return this.generalSettingsService.getAddressByUserId();
