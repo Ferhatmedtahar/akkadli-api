@@ -1,24 +1,8 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-} from '@nestjs/common';
-import {
-  ApiBody,
-  ApiOperation,
-  ApiProperty,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { Auth } from 'src/auth/decorators/auth.decorator';
-import { authType } from 'src/auth/enums/auth-type.enum';
-import { CreateUserDto } from './dtos/createUser.dto';
-import { GetUserParamsDto } from './dtos/getUserParams.dto';
+import { Body, Controller, Delete, Get, Patch } from '@nestjs/common';
+import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+// import { GetUserParamsDto } from './dtos/getUserParams.dto';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
+import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { PatchUserDto } from './dtos/patchUser.dto';
 import { UsersService } from './providers/users.service';
 
@@ -30,12 +14,34 @@ export class UsersController {
     inject users service */
     private readonly usersService: UsersService,
   ) {}
-  @Get('/:id')
+
+  @Get('/me')
   @ApiOperation({ summary: 'get user by id' })
   @ApiProperty({ description: 'id of the user', example: 1 })
-  public getUserById(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findUserById(id);
+  public getUserMe(@ActiveUser() user: ActiveUserData) {
+    console.log(user);
+    return this.usersService.findUserById(user.sub);
   }
+
+  @Patch('/me')
+  public patchUsers(
+    @Body() patchUserDto: PatchUserDto,
+    @ActiveUser() user: ActiveUserData,
+  ) {
+    return this.usersService.udpateUser(patchUserDto, user);
+  }
+
+  @Delete('/me')
+  public deleteUsers(@ActiveUser() user: ActiveUserData) {
+    return this.usersService.delete(user);
+  }
+  // @Get('/:id')
+  // @ApiOperation({ summary: 'get user by id' })
+  // @ApiProperty({ description: 'id of the user', example: 1 })
+  // public getUserById(@ActiveUser() user: ActiveUserData) {
+  //   return this.usersService.findUserById(user.sub);
+  // }
+
   // @Post()
   // @Auth(authType.None)
   // @ApiOperation({ summary: 'create user' })
@@ -44,17 +50,4 @@ export class UsersController {
   // public createUser(@Body() createUserDto: CreateUserDto) {
   //   return this.usersService.createUser(createUserDto);
   // }
-
-  @Patch('/:id')
-  public patchUsers(
-    @Body() patchUserDto: PatchUserDto,
-    @Param() getUserParamsDto: GetUserParamsDto,
-  ) {
-    return this.usersService.udpateUser(patchUserDto, getUserParamsDto);
-  }
-
-  @Delete('/:id')
-  public deleteUsers(@Param() getUserParamsDto: GetUserParamsDto) {
-    return this.usersService.delete(getUserParamsDto);
-  }
 }

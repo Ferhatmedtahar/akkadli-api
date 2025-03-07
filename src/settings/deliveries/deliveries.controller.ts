@@ -8,6 +8,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
+import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { CreateDeliveryDto } from './dtos/createDeliveries.dto';
 import { GetDeliveriesDto } from './dtos/getDeliveries.dto';
 import { GetDeliveryParamsDto } from './dtos/getDeliveryParams.dto';
@@ -22,32 +24,49 @@ export class DeliveriesController {
   ) {}
 
   @Post()
-  public createDelivery(@Body() createDeliveryDto: CreateDeliveryDto) {
-    return this.deliveriesService.createDelivery(createDeliveryDto);
+  public createDelivery(
+    @Body() createDeliveryDto: CreateDeliveryDto,
+    @ActiveUser() user: ActiveUserData,
+  ) {
+    return this.deliveriesService.createDelivery(createDeliveryDto, user.sub);
   }
 
   @Get()
-  public findAllByUserId(@Query() deliveriesQuery: GetDeliveriesDto) {
-    return this.deliveriesService.findAllByUserId(deliveriesQuery);
+  public findAllByUserId(
+    @Query() deliveriesQuery: GetDeliveriesDto,
+    @ActiveUser() user: ActiveUserData,
+  ) {
+    return this.deliveriesService.findAllByUserId(deliveriesQuery, user.sub);
   }
 
   @Get('/:id')
-  public findOneById(@Param() getDeliveryParamsDto: GetDeliveryParamsDto) {
-    return this.deliveriesService.findOneById(getDeliveryParamsDto);
+  public findOneById(
+    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
+    @ActiveUser() user: ActiveUserData,
+  ) {
+    return this.deliveriesService.findOneById(getDeliveryParamsDto, user.sub);
   }
 
   @Patch('/:id')
   public updateDelivery(
     @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
     @Body() patchDeliveryDto: PatchDeliveryDto,
+    @ActiveUser() user: ActiveUserData,
   ) {
     return this.deliveriesService.updateDelivery(
       getDeliveryParamsDto,
       patchDeliveryDto,
+      user.sub,
     );
   }
   @Delete('/:id')
-  public deleteDelivery(@Param() getDeliveryParamsDto: GetDeliveryParamsDto) {
-    return this.deliveriesService.deleteDelivery(getDeliveryParamsDto);
+  public deleteDelivery(
+    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
+    @ActiveUser() user: ActiveUserData,
+  ) {
+    return this.deliveriesService.deleteDelivery(
+      getDeliveryParamsDto,
+      user.sub,
+    );
   }
 }

@@ -1,10 +1,8 @@
 import {
-  Body,
   Injectable,
   InternalServerErrorException,
   Logger,
   NotFoundException,
-  Param,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,15 +25,16 @@ export class UpdateDeliveryProvider {
   ) {}
 
   public async updateDelivery(
-    @Body() patchDeliveryDto: PatchDeliveryDto,
-    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
+    patchDeliveryDto: PatchDeliveryDto,
+    getDeliveryParamsDto: GetDeliveryParamsDto,
+    userId: number,
   ) {
     // 1. Get the user (hardcoded for now, replace with auth later)
     let user = undefined;
     try {
-      user = await this.usersService.findUserById(19); // Replace with auth later
+      user = await this.usersService.findUserById(userId);
       this.logger.log('User fetched successfully for delivery update:', {
-        userId: 19,
+        userId: userId,
       });
     } catch (error) {
       this.logger.error(
@@ -49,7 +48,7 @@ export class UpdateDeliveryProvider {
     }
 
     if (!user) {
-      this.logger.warn('User not found for ID 19');
+      this.logger.warn(`User not found for ID ${userId}`);
       throw new NotFoundException('User not found', {
         description: 'User does not exist in the database',
       });

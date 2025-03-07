@@ -21,7 +21,10 @@ export class CreateDeliveryProvider {
     /**inject user service */
     private readonly usersService: UsersService,
   ) {}
-  public async createDelivery(@Body() createDeliveryDto: CreateDeliveryDto) {
+  public async createDelivery(
+    createDeliveryDto: CreateDeliveryDto,
+    userId: number,
+  ) {
     //get user  based on user id from body , later will change to getit from auth
     let user = undefined;
     let existingDelivery = undefined;
@@ -46,7 +49,7 @@ export class CreateDeliveryProvider {
       });
     }
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',

@@ -1,22 +1,15 @@
-import {
-  Body,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-  Param,
-  RequestTimeoutException,
-} from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { AuthService } from 'src/auth/providers/auth.service';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/createUser.dto';
-import { GetUserParamsDto } from '../dtos/getUserParams.dto';
 import { PatchUserDto } from '../dtos/patchUser.dto';
 import { User } from '../user.entity';
 import { CreateGoogleUserProvider } from './create-google-user.provider';
 import { DeleteGoogleUserProvider } from './delete-google-user.provider';
 import { GetGoogleUserProvider } from './get-google-user.provider';
+import { UpdateGoogleUserProvider } from './update-google-user.provider';
 
 @Injectable()
 export class UsersService {
@@ -34,10 +27,15 @@ export class UsersService {
     private readonly createGoogleUserProvider: CreateGoogleUserProvider,
     /**inject get user provider */
     private readonly GetGoogleUserProvider: GetGoogleUserProvider,
+    /**inject update user provider */
+    private readonly updateGoogleUserProvider: UpdateGoogleUserProvider,
     /**inject delete user provider */
     private readonly deleteGoogleUserProvider: DeleteGoogleUserProvider,
   ) {}
 
+  public async createUser(createUserDto: CreateUserDto) {
+    return this.createGoogleUserProvider.createUser(createUserDto);
+  }
   public async findUserByGoogleId(googleId: string): Promise<User> {
     return this.GetGoogleUserProvider.findUserByGoogleId(googleId);
   }
@@ -45,52 +43,14 @@ export class UsersService {
     return this.GetGoogleUserProvider.findUserById(id);
   }
 
-  public async createUser(@Body() createUserDto: CreateUserDto) {
-    return this.createGoogleUserProvider.createUser(createUserDto);
-  }
-
-  public async delete(@Param() getUserParamsDto: GetUserParamsDto) {
-    return this.deleteGoogleUserProvider.delete(getUserParamsDto);
-  }
-
   public async udpateUser(
-    @Body() patchUserDto: PatchUserDto,
-    @Param() getUserParamsDto: GetUserParamsDto,
+    patchUserDto: PatchUserDto,
+    userData: ActiveUserData,
   ) {
-    let user = undefined;
-    try {
-      user = await this.userRepository.findOne({
-        where: { id: getUserParamsDto.id },
-      });
-    } catch {
-      throw new RequestTimeoutException(
-        'Unable to process the request at the moment, please try later',
-        {
-          description: 'error connecting to the database',
-          // cause: error,
-        },
-      );
-    }
-    if (!user) {
-      throw new NotFoundException(`user not found, please sign up`, {
-        description: 'error finding the user',
-      });
-    }
+    return this.updateGoogleUserProvider.udpateUser(patchUserDto, userData);
+  }
 
-    user.firstName = patchUserDto.firstName;
-    user.lastName = patchUserDto.lastName;
-
-    try {
-      await this.userRepository.save(user);
-    } catch {
-      throw new RequestTimeoutException(
-        'Unable to process the request at the moment, please try later',
-        {
-          description: 'error connecting to the database',
-          // cause: error,
-        },
-      );
-    }
-    return user;
+  public async delete(user: ActiveUserData) {
+    return this.deleteGoogleUserProvider.delete(user);
   }
 }

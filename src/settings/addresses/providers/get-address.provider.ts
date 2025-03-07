@@ -17,11 +17,11 @@ export class GetAddressProvider {
     @InjectRepository(Address)
     private readonly addressRepository: Repository<Address>,
   ) {}
-  public async getAddressByUserId() {
+  public async getAddressByUserId(userId: number) {
     let user = undefined;
     let address = undefined;
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',

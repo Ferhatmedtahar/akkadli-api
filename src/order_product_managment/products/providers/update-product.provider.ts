@@ -9,7 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 import { UsersService } from 'src/users/providers/users.service';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { GetProductParamsDto } from '../dtos/getProductParams.dto';
 import { PatchProductDto } from '../dtos/patchProduct.dto';
 import { Product } from '../product.entity';
@@ -22,18 +22,20 @@ export class UpdateProductProvider {
     /**inject products repository */
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
+
     /**inject order product service */
     private readonly orderProductService: OrderProductService,
   ) {}
   public async updateProduct(
-    @Param() getProductParamsDto: GetProductParamsDto,
-    @Body() updateProductDto: PatchProductDto,
+    getProductParamsDto: GetProductParamsDto,
+    updateProductDto: PatchProductDto,
+    userId: number,
   ) {
     let product = undefined;
     let user = undefined;
     let totalOrderedQuantity = undefined;
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
@@ -138,5 +140,33 @@ export class UpdateProductProvider {
         },
       );
     }
+  }
+
+  public async updateProductFromOrder(
+    product: Product,
+    manager?: EntityManager,
+  ): Promise<Product> {
+    // Use the provided manager if available, otherwise use the repository
+    const repository = manager
+      ? manager.getRepository(Product)
+      : this.productsRepository;
+
+    // Find the existing product using the repository
+    const existingProduct = await repository.findOne({
+      where: { id: product.id },
+    });
+    if (!existingProduct) {
+      throw new NotFoundException(`Product with ID ${product.id} not found`);
+    }
+
+    // Validate quantity
+    if (product.quantity < 0) {
+      throw new BadRequestException(
+        `Product ${product.id} quantity cannot be negative`,
+      );
+    }
+
+    // Save the updated product using the repository
+    return repository.save(product);
   }
 }

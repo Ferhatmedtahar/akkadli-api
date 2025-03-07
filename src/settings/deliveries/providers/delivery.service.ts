@@ -24,30 +24,46 @@ export class DeliveryService {
     /**inject delete delivery provider */
     private readonly deleteDeliveryProvider: DeleteDeliveryProvider,
   ) {}
-  public async createDelivery(@Body() createDeliveryDto: CreateDeliveryDto) {
-    return this.createDeliveryProvider.createDelivery(createDeliveryDto);
+  public async createDelivery(
+    createDeliveryDto: CreateDeliveryDto,
+    userId: number,
+  ) {
+    return this.createDeliveryProvider.createDelivery(
+      createDeliveryDto,
+      userId,
+    );
   }
 
   public async findOneById(
-    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
+    getDeliveryParamsDto: GetDeliveryParamsDto,
+    userId: number,
   ) {
-    return this.getDeliveryProvider.findOneById(getDeliveryParamsDto);
+    return this.getDeliveryProvider.findOneById(getDeliveryParamsDto, userId);
   }
-  public async findAllByUserId(deliveriesQuery: GetDeliveriesDto) {
-    return this.getDeliveryProvider.findAllByUserId(deliveriesQuery);
+  public async findAllByUserId(
+    deliveriesQuery: GetDeliveriesDto,
+    userId: number,
+  ) {
+    return this.getDeliveryProvider.findAllByUserId(deliveriesQuery, userId);
   }
   public async updateDelivery(
-    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
-    @Body() patchDeliveryDto: PatchDeliveryDto,
+    getDeliveryParamsDto: GetDeliveryParamsDto,
+    patchDeliveryDto: PatchDeliveryDto,
+    userId: number,
   ) {
     return this.updateDeliveryProvider.updateDelivery(
       patchDeliveryDto,
       getDeliveryParamsDto,
+      userId,
     );
   }
   public async deleteDelivery(
-    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
+    getDeliveryParamsDto: GetDeliveryParamsDto,
+    userId: number,
   ) {
-    return this.deleteDeliveryProvider.deleteDelivery(getDeliveryParamsDto);
+    return this.deleteDeliveryProvider.deleteDelivery(
+      getDeliveryParamsDto,
+      userId,
+    );
   }
 }

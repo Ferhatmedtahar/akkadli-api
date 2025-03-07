@@ -1,7 +1,8 @@
-PATCH http://localhost:3000/products/7
+PATCH http://localhost:3000/products/2
+Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIzLCJlbWFpbCI6ImZlcmhhdHRhaGVyMDBAZ21haWwuY29tIiwiaWF0IjoxNzQxMzg2NjY4LCJleHAiOjE3NDEzOTAyNjgsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCJ9.ugr9ZtrYsG8_Xi_n45WhN3us8CMAqT4qy3nUfunTsRk
 Content-Type:application/json
 {
- "discount":0
-
+ "discount":0,
+  "productName":"hello"
 
 }

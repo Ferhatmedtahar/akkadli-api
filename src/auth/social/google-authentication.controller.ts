@@ -15,7 +15,6 @@ export class GoogleAuthenticationController {
   @Post()
   @Auth(authType.None)
   public async googleAuthentication(@Body() googleTokenDto: GoogleTokenDto) {
-    console.log('start', googleTokenDto);
     return this.googleAuthenticationService.authenticate(googleTokenDto);
   }
 }

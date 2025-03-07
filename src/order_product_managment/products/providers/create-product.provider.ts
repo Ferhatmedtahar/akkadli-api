@@ -11,6 +11,7 @@ import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from '../dtos/createProduct.dto';
 import { Product } from '../product.entity';
+import { User } from 'src/users/user.entity';
 
 @Injectable()
 export class CreateProductProvider {
@@ -25,16 +26,17 @@ export class CreateProductProvider {
   ) {}
 
   public async createProductProvider(
-    @Body() createProductDto: CreateProductDto,
+    createProductDto: CreateProductDto,
+    userId: number,
   ): Promise<Product> {
-    let user: any; // Adjust type based on your User entity
+    let user: User;
     let product: Product;
 
     // 1. Find user from database based on the author ID
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
       this.logger.log('User fetched successfully for product creation:', {
-        userId: 19,
+        userId: user.id,
       });
     } catch (error) {
       this.logger.error(
@@ -48,7 +50,7 @@ export class CreateProductProvider {
     }
 
     if (!user) {
-      this.logger.warn('User not found for ID 19');
+      this.logger.warn(`User not found for ID ${userId}`);
       throw new NotFoundException('User not found', {
         description: 'User does not exist in the database',
       });

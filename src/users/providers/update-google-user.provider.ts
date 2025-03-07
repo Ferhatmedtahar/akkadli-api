@@ -1,24 +1,13 @@
 import {
-  BadRequestException,
-  Body,
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
   Injectable,
   NotFoundException,
-  Param,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthService } from 'src/auth/providers/auth.service';
+import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from '../dtos/createUser.dto';
-import { GetUserParamsDto } from '../dtos/getUserParams.dto';
 import { PatchUserDto } from '../dtos/patchUser.dto';
 import { User } from '../user.entity';
-import { CreateGoogleUserProvider } from './create-google-user.provider';
-import { DeleteGoogleUserProvider } from './delete-google-user.provider';
 
 @Injectable()
 export class UpdateGoogleUserProvider {
@@ -28,13 +17,13 @@ export class UpdateGoogleUserProvider {
     private readonly userRepository: Repository<User>,
   ) {}
   public async udpateUser(
-    @Body() patchUserDto: PatchUserDto,
-    @Param() getUserParamsDto: GetUserParamsDto,
+    patchUserDto: PatchUserDto,
+    userData: ActiveUserData,
   ) {
     let user = undefined;
     try {
       user = await this.userRepository.findOne({
-        where: { id: getUserParamsDto.id },
+        where: { id: userData.sub },
       });
     } catch {
       throw new RequestTimeoutException(
@@ -51,11 +40,11 @@ export class UpdateGoogleUserProvider {
       });
     }
 
-    user.firstName = patchUserDto.firstName;
-    user.lastName = patchUserDto.lastName;
+    user.firstName = patchUserDto.firstName ?? user.firstName;
+    user.lastName = patchUserDto.lastName ?? user.lastName;
 
     try {
-      await this.userRepository.save(user);
+      user = await this.userRepository.save(user);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',

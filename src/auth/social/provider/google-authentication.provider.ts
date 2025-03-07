@@ -39,7 +39,6 @@ export class GoogleAuthenticationService implements OnModuleInit {
       const loginTicket = await this.oauthClient.verifyIdToken({
         idToken: googleTokenDto.token,
       });
-      console.log(loginTicket);
       //extract the payload from the Google JWT
       const {
         email,
@@ -49,16 +48,12 @@ export class GoogleAuthenticationService implements OnModuleInit {
         picture: publicProfileUrl,
       } = loginTicket.getPayload();
 
-      console.log(publicProfileUrl);
-
       //check if user exists in our database using googeId
       try {
         user = await this.userService.findUserByGoogleId(googleId);
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
       //if google id exists generate tokens
-      console.log(user);
+
       if (user) {
         return this.generateTokenProvider.generateTokens(user);
       }
@@ -71,7 +66,6 @@ export class GoogleAuthenticationService implements OnModuleInit {
         email,
         publicProfileUrl,
       } as CreateUserDto);
-      console.log(newUser);
       if (newUser) {
         return this.generateTokenProvider.generateTokens(newUser);
       }

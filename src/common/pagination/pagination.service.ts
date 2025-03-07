@@ -35,9 +35,9 @@ export class PaginationService {
 
     const baseUrl = `${this.request.protocol}://${this.request.headers.host}`;
     const newUrl = new URL(this.request.url, baseUrl);
-    // console.log(newUrl);
+
     /** now we need to calculate the metadata */
-    const totalItems = await repository.count();
+    const totalItems = await repository.count({ where });
     const itemsPerPage = limit;
     const currentPage = page;
     const totalPages = Math.ceil(totalItems / itemsPerPage);

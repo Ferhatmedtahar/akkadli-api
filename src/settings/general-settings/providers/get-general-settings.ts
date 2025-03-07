@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 import { GeneralSettings } from '../general-settings.entity';
 
 @Injectable()
-export class GetGeneralSettings {
+export class GetGeneralSettingsProvider {
   constructor(
     /**inject user service */
     private readonly usersService: UsersService,
@@ -17,13 +17,13 @@ export class GetGeneralSettings {
     @InjectRepository(GeneralSettings)
     private readonly generalSettingsRepository: Repository<GeneralSettings>,
   ) {}
-  public async getGeneralSettingsByUserId() {
+  public async getGeneralSettingsUser(userId: number) {
+    console.log(userId);
     let user = undefined;
     let generalSettings = undefined;
-    //TODO replace the static user id with the id from the request after authentication
-
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
+      console.log(user);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',

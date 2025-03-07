@@ -37,80 +37,60 @@ export class ProductsService {
     private readonly deleteProductProvider: DeleteProductProvider,
   ) {}
 
-  public async createProduct(createProductDto: CreateProductDto) {
+  public async createProduct(
+    createProductDto: CreateProductDto,
+    userId: number,
+  ) {
     return await this.createProductProvider.createProductProvider(
       createProductDto,
+      userId,
     );
   }
 
-  public async getProductById(getProductParamsDto: GetProductParamsDto) {
-    return this.getProductProvider.getProductById(getProductParamsDto);
+  public async getProductById(
+    getProductParamsDto: GetProductParamsDto,
+    userId: number,
+  ) {
+    return this.getProductProvider.getProductById(getProductParamsDto, userId);
   }
-  public async findAll(productsQuery: GetProductsDto) {
-    return this.getProductProvider.findAll(productsQuery);
+  public async findAll(productsQuery: GetProductsDto, userId: number) {
+    return this.getProductProvider.findAll(productsQuery, userId);
   }
   public async getProductByIdWithRelations(
     getProductParamsDto: GetProductParamsDto,
+    userId: number,
   ) {
     return this.getProductProvider.getProductByIdWithRelations(
       getProductParamsDto,
+      userId,
     );
   }
   public async updateProduct(
     getProductParamsDto: GetProductParamsDto,
     updateProductDto: PatchProductDto,
+    userId: number,
   ) {
     return this.updateProductProvider.updateProduct(
       getProductParamsDto,
       updateProductDto,
+      userId,
     );
-  }
-  public async deleteProduct(
-    @Param() getProductParamsDto: GetProductParamsDto,
-  ) {
-    return this.deleteProductProvider.deleteProduct(getProductParamsDto);
   }
 
   public async updateProductFromOrder(
     product: Product,
     manager?: EntityManager,
   ): Promise<Product> {
-    // Use the provided manager if available, otherwise use the repository
-    const repository = manager
-      ? manager.getRepository(Product)
-      : this.productRepository;
-
-    // Find the existing product using the repository
-    const existingProduct = await repository.findOne({
-      where: { id: product.id },
-    });
-    if (!existingProduct) {
-      throw new NotFoundException(`Product with ID ${product.id} not found`);
-    }
-
-    // Validate quantity
-    if (product.quantity < 0) {
-      throw new BadRequestException(
-        `Product ${product.id} quantity cannot be negative`,
-      );
-    }
-
-    // Save the updated product using the repository
-    return repository.save(product);
+    return this.updateProductProvider.updateProductFromOrder(product, manager);
   }
-  // public async updateProductFromOrder(product: Product) {
-  //   const existingProduct = await this.productRepository.findOne({
-  //     where: { id: product.id },
-  //   });
-  //   if (!existingProduct) {
-  //     throw new NotFoundException(`Product with ID ${product.id} not found`);
-  //   }
 
-  //   if (product.quantity < 0) {
-  //     throw new BadRequestException(
-  //       `Product ${product.id} quantity cannot be negative`,
-  //     );
-  //   }
-  //   return this.productRepository.save(product);
-  // }
+  public async deleteProduct(
+    getProductParamsDto: GetProductParamsDto,
+    userId: number,
+  ) {
+    return this.deleteProductProvider.deleteProduct(
+      getProductParamsDto,
+      userId,
+    );
+  }
 }

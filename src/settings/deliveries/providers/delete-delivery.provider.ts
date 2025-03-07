@@ -21,13 +21,14 @@ export class DeleteDeliveryProvider {
     private readonly usersService: UsersService,
   ) {}
   public async deleteDelivery(
-    @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
+    getDeliveryParamsDto: GetDeliveryParamsDto,
+    userId: number,
   ) {
     //get user id from request
     let user = undefined;
     let deletedDelivery = undefined;
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',

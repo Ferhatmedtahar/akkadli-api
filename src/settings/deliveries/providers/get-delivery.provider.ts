@@ -23,12 +23,15 @@ export class GetDeliveryProvider {
     /**inject pagination service */
     private readonly paginationService: PaginationService,
   ) {}
-  public async findOneById(getDeliveryParamsDto: GetDeliveryParamsDto) {
+  public async findOneById(
+    getDeliveryParamsDto: GetDeliveryParamsDto,
+    userId: number,
+  ) {
     //get user id from request
     let user = undefined;
     let delivery = undefined;
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
@@ -68,12 +71,13 @@ export class GetDeliveryProvider {
 
   public async findAllByUserId(
     deliveriesQuery: GetDeliveriesDto,
+    userId: number,
   ): Promise<Paginated<Delivery>> {
     //get user id from request
     let user = undefined;
     let deliveries = undefined;
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',

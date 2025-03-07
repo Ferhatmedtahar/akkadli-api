@@ -1,12 +1,5 @@
-import { Body, Injectable, Param } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { UsersService } from 'src/users/providers/users.service';
-import { Repository } from 'typeorm';
-import { Address } from '../address.entity';
-import { CreateAddressDto } from '../dtos/createAddress.dto';
-import { GetAddressParamDto } from '../dtos/getAddressParam.dto';
+import { Body, Injectable } from '@nestjs/common';
 import { PatchAddressDto } from '../dtos/patchAddress.dto';
-
 import { GetAddressProvider } from './get-address.provider';
 import { PatchAddressProvider } from './patch-address.provider';
 
@@ -19,11 +12,14 @@ export class AddressService {
     private readonly getAddressProvider: GetAddressProvider,
   ) {}
 
-  public async getAddressByUserId() {
-    return this.getAddressProvider.getAddressByUserId();
+  public async getAddressByUserId(userId: number) {
+    return this.getAddressProvider.getAddressByUserId(userId);
   }
 
-  public async updateAddress(@Body() patchAddressDto: PatchAddressDto) {
-    return this.patchAddressProvider.updateAddress(patchAddressDto);
+  public async updateAddress(
+    @Body() patchAddressDto: PatchAddressDto,
+    userId: number,
+  ) {
+    return this.patchAddressProvider.updateAddress(patchAddressDto, userId);
   }
 }

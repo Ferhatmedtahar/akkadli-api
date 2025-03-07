@@ -25,9 +25,12 @@ export class GetProductProvider {
     private readonly paginationService: PaginationService,
   ) {}
 
-  public async getProductById(getProductParamsDto: GetProductParamsDto) {
+  public async getProductById(
+    getProductParamsDto: GetProductParamsDto,
+    userId: number,
+  ) {
     // get the user id from the request and Find the user
-    const userId = 19;
+
     let user = undefined;
     let product = undefined;
     try {
@@ -73,14 +76,13 @@ export class GetProductProvider {
   }
   public async findAll(
     productsQuery: GetProductsDto,
+    userId: number,
   ): Promise<Paginated<Product>> {
-    //find a user and check if it exist in db
-    //TODO later change the user to the current user on the request
-
     let user = undefined;
     let products = undefined;
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
+      console.log(user);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
@@ -119,9 +121,8 @@ export class GetProductProvider {
 
   public async getProductByIdWithRelations(
     getProductParamsDto: GetProductParamsDto,
+    userId: number,
   ) {
-    // get the user id from the request and Find the user
-    const userId = 19;
     let user = undefined;
     let product = undefined;
     try {

@@ -1,24 +1,11 @@
 import {
   BadRequestException,
-  Body,
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
   Injectable,
-  NotFoundException,
-  Param,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthService } from 'src/auth/providers/auth.service';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from '../dtos/createUser.dto';
-import { GetUserParamsDto } from '../dtos/getUserParams.dto';
-import { PatchUserDto } from '../dtos/patchUser.dto';
 import { User } from '../user.entity';
-import { CreateGoogleUserProvider } from './create-google-user.provider';
-import { DeleteGoogleUserProvider } from './delete-google-user.provider';
 
 @Injectable()
 export class GetGoogleUserProvider {

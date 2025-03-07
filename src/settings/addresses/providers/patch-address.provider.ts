@@ -1,4 +1,4 @@
-import { Body, Injectable, RequestTimeoutException } from '@nestjs/common';
+import { Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
@@ -14,12 +14,12 @@ export class PatchAddressProvider {
     @InjectRepository(Address)
     private readonly addressRepository: Repository<Address>,
   ) {}
-  public async updateAddress(@Body() patchAddressDto: PatchAddressDto) {
+  public async updateAddress(patchAddressDto: PatchAddressDto, userId: number) {
     let user = undefined;
     let updatedAddress = undefined;
     //find the user using the user service and id from the auth token
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
@@ -31,9 +31,9 @@ export class PatchAddressProvider {
     }
     //find the address using the user
     try {
-      updatedAddress = await this.addressRepository.findOneById(
-        user.address.id,
-      );
+      updatedAddress = await this.addressRepository.findOne({
+        where: { id: user.address.id },
+      });
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
@@ -44,6 +44,7 @@ export class PatchAddressProvider {
       );
     }
 
+    console.log(updatedAddress, patchAddressDto);
     //update the address
     updatedAddress.wilaya = patchAddressDto.wilaya || updatedAddress.wilaya;
     updatedAddress.municipality =
@@ -54,6 +55,7 @@ export class PatchAddressProvider {
     //save the address
     try {
       updatedAddress = await this.addressRepository.save(updatedAddress);
+      console.log(updatedAddress);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
