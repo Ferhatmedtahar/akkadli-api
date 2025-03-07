@@ -1,9 +1,7 @@
 import {
   BadRequestException,
-  Body,
   Injectable,
   NotFoundException,
-  Param,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -144,6 +142,7 @@ export class UpdateProductProvider {
 
   public async updateProductFromOrder(
     product: Product,
+    userId: number,
     manager?: EntityManager,
   ): Promise<Product> {
     // Use the provided manager if available, otherwise use the repository
@@ -153,7 +152,7 @@ export class UpdateProductProvider {
 
     // Find the existing product using the repository
     const existingProduct = await repository.findOne({
-      where: { id: product.id },
+      where: { id: product.id, user: { id: userId } },
     });
     if (!existingProduct) {
       throw new NotFoundException(`Product with ID ${product.id} not found`);

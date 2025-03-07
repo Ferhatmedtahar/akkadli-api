@@ -37,32 +37,43 @@ export class OrdersService {
     private readonly deleteOrderProvider: DeleteOrderProvider,
   ) {}
 
-  public async createOrder(@Body() createOrderDto: CreateOrderDto) {
-    return await this.createOrderProvider.createOrder(createOrderDto);
+  public async createOrder(createOrderDto: CreateOrderDto, userId: number) {
+    return await this.createOrderProvider.createOrder(createOrderDto, userId);
   }
 
-  public async getOrderbyId(@Param() getOrderParamsDto: GetOrderParamsDto) {
-    return await this.getOrderProvider.getOrder(getOrderParamsDto);
+  public async getOrderbyId(
+    getOrderParamsDto: GetOrderParamsDto,
+    userId: number,
+  ) {
+    return await this.getOrderProvider.getOrder(getOrderParamsDto, userId);
   }
-  public async getAllOrders(ordersQuery: GetOrdersDto) {
-    return await this.getOrderProvider.getAllOrders(ordersQuery);
+  public async getAllOrders(ordersQuery: GetOrdersDto, userId: number) {
+    return await this.getOrderProvider.getAllOrders(ordersQuery, userId);
   }
 
   public async updateOrder(
-    @Param() getOrderParamsDto: GetOrderParamsDto,
-    @Body() updateOrderDto: PatchOrderDto,
+    getOrderParamsDto: GetOrderParamsDto,
+    updateOrderDto: PatchOrderDto,
+    userId: number,
   ) {
     return await this.updateOrderProvider.updateOrder(
       getOrderParamsDto,
       updateOrderDto,
+      userId,
     );
   }
 
-  public async deleteOrder(@Param() getOrderParamsDto: GetOrderParamsDto) {
-    return this.deleteOrderProvider.deleteOrder(getOrderParamsDto);
+  public async deleteOrder(
+    getOrderParamsDto: GetOrderParamsDto,
+    userId: number,
+  ) {
+    return this.deleteOrderProvider.deleteOrder(getOrderParamsDto, userId);
   }
 
-  public async softDeleteOrder(@Param() getOrderParamsDto: GetOrderParamsDto) {
-    return this.deleteOrderProvider.softDeleteOrder(getOrderParamsDto);
+  public async softDeleteOrder(
+    getOrderParamsDto: GetOrderParamsDto,
+    userId: number,
+  ) {
+    return this.deleteOrderProvider.softDeleteOrder(getOrderParamsDto, userId);
   }
 }

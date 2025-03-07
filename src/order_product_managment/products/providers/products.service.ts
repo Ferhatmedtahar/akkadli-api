@@ -1,21 +1,15 @@
-import {
-  BadRequestException,
-  Body,
-  Injectable,
-  NotFoundException,
-  Param,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { CreateProductDto } from '../dtos/createProduct.dto';
 import { GetProductParamsDto } from '../dtos/getProductParams.dto';
+import { GetProductsDto } from '../dtos/getProducts.dto';
 import { PatchProductDto } from '../dtos/patchProduct.dto';
 import { Product } from '../product.entity';
 import { CreateProductProvider } from './create-product.provider';
 import { DeleteProductProvider } from './delete-product.provider';
 import { GetProductProvider } from './get-product.provider';
 import { UpdateProductProvider } from './update-product.provider';
-import { EntityManager, Repository } from 'typeorm';
-import { GetProductsDto } from '../dtos/getProducts.dto';
 
 @Injectable()
 export class ProductsService {
@@ -79,9 +73,14 @@ export class ProductsService {
 
   public async updateProductFromOrder(
     product: Product,
+    userId: number,
     manager?: EntityManager,
   ): Promise<Product> {
-    return this.updateProductProvider.updateProductFromOrder(product, manager);
+    return this.updateProductProvider.updateProductFromOrder(
+      product,
+      userId,
+      manager,
+    );
   }
 
   public async deleteProduct(

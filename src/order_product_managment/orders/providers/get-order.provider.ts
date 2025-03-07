@@ -25,11 +25,11 @@ export class GetOrderProvider {
     private readonly paginationService: PaginationService,
   ) {}
 
-  public async getOrder(@Param() getOrderParamsDto: GetOrderParamsDto) {
+  public async getOrder(getOrderParamsDto: GetOrderParamsDto, userId: number) {
     let user = undefined;
     let order = undefined;
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
@@ -70,11 +70,12 @@ export class GetOrderProvider {
 
   public async getAllOrders(
     ordersQuery: GetOrdersDto,
+    userId: number,
   ): Promise<Paginated<Order>> {
     let orders = undefined;
     let user = undefined;
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',

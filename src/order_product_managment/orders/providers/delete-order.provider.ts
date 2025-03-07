@@ -28,11 +28,14 @@ export class DeleteOrderProvider {
     private readonly orderProductService: OrderProductService,
   ) {}
 
-  public async deleteOrder(@Param() getOrderParamsDto: GetOrderParamsDto) {
+  public async deleteOrder(
+    getOrderParamsDto: GetOrderParamsDto,
+    userId: number,
+  ) {
     let user = undefined;
     let order = undefined;
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
@@ -48,7 +51,7 @@ export class DeleteOrderProvider {
 
     try {
       order = await this.orderRepository.findOne({
-        where: { id: getOrderParamsDto.id },
+        where: { id: getOrderParamsDto.id, user: { id: user.id } },
       });
     } catch {
       throw new RequestTimeoutException(
@@ -86,11 +89,14 @@ export class DeleteOrderProvider {
     };
   }
 
-  public async softDeleteOrder(@Param() getOrderParamsDto: GetOrderParamsDto) {
+  public async softDeleteOrder(
+    getOrderParamsDto: GetOrderParamsDto,
+    userId: number,
+  ) {
     let user = undefined;
     let order = undefined;
     try {
-      user = await this.usersService.findUserById(19);
+      user = await this.usersService.findUserById(userId);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
@@ -106,7 +112,7 @@ export class DeleteOrderProvider {
 
     try {
       order = await this.orderRepository.findOne({
-        where: { id: getOrderParamsDto.id },
+        where: { id: getOrderParamsDto.id, user: { id: user.id } },
       });
     } catch {
       throw new RequestTimeoutException(

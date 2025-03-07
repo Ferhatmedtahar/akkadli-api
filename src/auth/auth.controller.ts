@@ -13,13 +13,6 @@ export class AuthController {
     /**inject auth service */
     private readonly authService: AuthService,
   ) {}
-  // @Post('sign-in')
-  // @HttpCode(HttpStatus.OK)
-  // @Auth(authType.None)
-  // public signIn(@Body() signInDto: SignInDto) {
-  //   return this.authService.signIn(signInDto);
-  // }
-
   @Post('refresh-tokens')
   @HttpCode(HttpStatus.OK)
   @Auth(authType.None)

@@ -1,18 +1,15 @@
 import {
   BadRequestException,
-  Body,
   Injectable,
   InternalServerErrorException,
   Logger,
   NotFoundException,
-  Param,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderProduct } from 'src/order_product_managment/order-product/order-product.entity';
 import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 import { Product } from 'src/order_product_managment/products/product.entity';
 import { ProductsService } from 'src/order_product_managment/products/providers/products.service';
-import { UsersService } from 'src/users/providers/users.service';
 import { User } from 'src/users/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { GetOrderParamsDto } from '../dtos/getOrderParams.dto';
@@ -29,25 +26,26 @@ export class UpdateOrderProvider {
     private orderRepository: Repository<Order>,
     private readonly productService: ProductsService,
     private readonly orderProductService: OrderProductService,
-    private readonly usersService: UsersService,
     private readonly dataSource: DataSource, // Inject DataSource for transactions
   ) {}
 
   public async updateOrder(
-    @Param() getOrderParamsDto: GetOrderParamsDto,
-    @Body() patchOrderDto: PatchOrderDto,
+    getOrderParamsDto: GetOrderParamsDto,
+    patchOrderDto: PatchOrderDto,
+    userId: number,
   ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // Step 1: Get the user
       let user: User;
       try {
-        user = await queryRunner.manager.findOne(User, { where: { id: 19 } }); // Replace with auth later
+        user = await queryRunner.manager.findOne(User, {
+          where: { id: userId },
+        });
         this.logger.log('User fetched successfully for order update:', {
-          userId: 19,
+          userId: userId,
         });
       } catch (error) {
         this.logger.error(
@@ -61,13 +59,12 @@ export class UpdateOrderProvider {
       }
 
       if (!user) {
-        this.logger.warn('User not found for ID 19');
+        this.logger.warn(`User not found for ID ${userId}`);
         throw new NotFoundException('User not found', {
           description: 'User does not exist in the database',
         });
       }
 
-      // Step 2: Get the order and its orderProducts
       let order: Order;
       try {
         order = await queryRunner.manager.findOne(Order, {
@@ -168,6 +165,7 @@ export class UpdateOrderProvider {
           try {
             await this.productService.updateProductFromOrder(
               product,
+              userId,
               queryRunner.manager,
             );
             this.logger.log('Product quantity reverted successfully:', {
@@ -281,6 +279,7 @@ export class UpdateOrderProvider {
               try {
                 await this.productService.updateProductFromOrder(
                   product,
+                  userId,
                   queryRunner.manager,
                 );
                 this.logger.log('Product quantity updated successfully:', {
@@ -378,6 +377,7 @@ export class UpdateOrderProvider {
             try {
               await this.productService.updateProductFromOrder(
                 product,
+                userId,
                 queryRunner.manager,
               );
               this.logger.log(
