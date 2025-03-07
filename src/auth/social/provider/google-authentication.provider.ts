@@ -1,0 +1,86 @@
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  OnModuleInit,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
+import { OAuth2Client } from 'google-auth-library';
+import jwtConfig from 'src/auth/config/jwt.config';
+import { GenerateTokenProvider } from 'src/auth/providers/generate-token.provider';
+import { CreateUserDto } from 'src/users/dtos/createUser.dto';
+import { UsersService } from 'src/users/providers/users.service';
+import { GoogleTokenDto } from '../dtos/google-token.dto';
+
+@Injectable()
+export class GoogleAuthenticationService implements OnModuleInit {
+  private oauthClient: OAuth2Client;
+  constructor(
+    /**inject jwt config service */
+    @Inject(jwtConfig.KEY)
+    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
+    /**inject user service */
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService,
+    /**generate token provider */
+    private readonly generateTokenProvider: GenerateTokenProvider,
+  ) {}
+  onModuleInit() {
+    const clientId = this.jwtConfiguration.googleClientId;
+    const clientSecret = this.jwtConfiguration.googleClientSecret;
+    this.oauthClient = new OAuth2Client(clientId, clientSecret);
+  }
+
+  public async authenticate(googleTokenDto: GoogleTokenDto) {
+    try {
+      let user = undefined;
+      //verify the google token sent by the user
+      const loginTicket = await this.oauthClient.verifyIdToken({
+        idToken: googleTokenDto.token,
+      });
+      console.log(loginTicket);
+      //extract the payload from the Google JWT
+      const {
+        email,
+        sub: googleId,
+        given_name: firstName,
+        family_name: lastName,
+        picture: publicProfileUrl,
+      } = loginTicket.getPayload();
+
+      console.log(publicProfileUrl);
+
+      //check if user exists in our database using googeId
+      try {
+        user = await this.userService.findUserByGoogleId(googleId);
+      } catch (e) {
+        console.log(e);
+      }
+      //if google id exists generate tokens
+      console.log(user);
+      if (user) {
+        return this.generateTokenProvider.generateTokens(user);
+      }
+      //if not create a new user then generate tokens
+
+      const newUser = await this.userService.createUser({
+        googleId,
+        firstName,
+        lastName,
+        email,
+        publicProfileUrl,
+      } as CreateUserDto);
+      console.log(newUser);
+      if (newUser) {
+        return this.generateTokenProvider.generateTokens(newUser);
+      }
+    } catch (error) {
+      //if error send unauthorized
+      throw new UnauthorizedException('User not found, please signup', {
+        description: 'error connecting to db',
+        cause: error,
+      });
+    }
+  }
+}

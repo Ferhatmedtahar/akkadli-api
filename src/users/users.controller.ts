@@ -36,14 +36,14 @@ export class UsersController {
   public getUserById(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findUserById(id);
   }
-  @Post()
-  @Auth(authType.None)
-  @ApiOperation({ summary: 'create user' })
-  @ApiBody({ type: CreateUserDto })
-  @ApiResponse({ status: 201, description: 'user created' })
-  public createUser(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.createUser(createUserDto);
-  }
+  // @Post()
+  // @Auth(authType.None)
+  // @ApiOperation({ summary: 'create user' })
+  // @ApiBody({ type: CreateUserDto })
+  // @ApiResponse({ status: 201, description: 'user created' })
+  // public createUser(@Body() createUserDto: CreateUserDto) {
+  //   return this.usersService.createUser(createUserDto);
+  // }
 
   @Patch('/:id')
   public patchUsers(

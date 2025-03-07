@@ -21,7 +21,7 @@ export default joi.object({
 
   DATABASE_AUTOLOAD_ENTITIES: joi.string().valid('true', 'false').required(),
 
-  PROFILE_API_KEY: joi.string().required(),
+  // PROFILE_API_KEY: joi.string().required(),
 
   PORT: joi.number().default(3000),
 
@@ -30,4 +30,7 @@ export default joi.object({
   JWT_TOKEN_ISSUER: joi.string().required(),
   JWT_TOKEN_AUDIENCE: joi.string().required(),
   JWT_REFRESH_TOKEN_TTL: joi.string().required(),
+
+  GOOGLE_CLIENT_SECRET: joi.string().required(),
+  GOOGLE_CLIENT_ID: joi.string().required(),
 });

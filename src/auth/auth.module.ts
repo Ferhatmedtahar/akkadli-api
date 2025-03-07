@@ -7,10 +7,17 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './providers/auth.service';
 import { GenerateTokenProvider } from './providers/generate-token.provider';
 import { RefreshTokenProvider } from './providers/refresh-token.provider';
+import { GoogleAuthenticationController } from './social/google-authentication.controller';
+import { GoogleAuthenticationService } from './social/provider/google-authentication.provider';
 
 @Module({
-  controllers: [AuthController],
-  providers: [AuthService, GenerateTokenProvider, RefreshTokenProvider],
+  controllers: [AuthController, GoogleAuthenticationController],
+  providers: [
+    AuthService,
+    GenerateTokenProvider,
+    RefreshTokenProvider,
+    GoogleAuthenticationService,
+  ],
   imports: [
     forwardRef(() => UsersModule),
     ConfigModule.forFeature(jwtConfig),

@@ -43,10 +43,17 @@ export class User {
   @Column({
     type: 'varchar',
     length: 255,
-    nullable: false,
+    nullable: true,
     unique: true,
   })
   googleId: string;
+
+  @Column({
+    type: 'varchar',
+    length: 1024,
+    nullable: true,
+  })
+  publicProfileUrl: string;
 
   @OneToOne(() => Address, (address) => address.user, {
     cascade: true,
@@ -66,7 +73,7 @@ export class User {
   @OneToMany(() => Product, (product) => product.user)
   products: Product[];
 
-  @OneToMany(() => Product, (product) => product.user)
+  @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
   @CreateDateColumn()
   createDate: Date;

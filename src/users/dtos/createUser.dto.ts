@@ -30,6 +30,11 @@ export class CreateUserDto {
   @IsNotEmpty()
   googleId: string;
 
+  @IsString()
+  @IsOptional()
+  @MaxLength(1024)
+  publicProfileUrl?: string;
+
   @IsOptional()
   @Type(() => CreateAddressDto)
   address?: CreateAddressDto;

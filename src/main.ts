@@ -16,6 +16,7 @@ async function bootstrap() {
       },
     }),
   );
+  app.enableCors();
   const config = new DocumentBuilder()
     .setTitle('Akkadli api')
     .setDescription('Use the base API URL as http://localhost:3000/')
