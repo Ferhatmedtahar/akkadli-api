@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import jwtConfig from './auth/config/jwt.config';
 import { AccessTokenGuard } from './auth/guards/access.token/access-token.guard';
 import { AuthenticationGuard } from './auth/guards/authentication/auth.guard';
+import { DataResponseInterceptor } from './common/interceptors/data-response/data-response.interceptor';
 import { PaginationModule } from './common/pagination/pagination.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import environmentValidation from './config/environment.validation';
+import { MailModule } from './mail/mail.module';
 import { OrderProductModule } from './order_product_managment/order-product/order-product.module';
 import { OrdersModule } from './order_product_managment/orders/orders.module';
 import { ProductsModule } from './order_product_managment/products/products.module';
@@ -57,6 +59,7 @@ const ENV = process.env.NODE_ENV.trim();
     GeneralSettingsModule,
     OrderProductModule,
     PaginationModule,
+    MailModule,
   ],
   controllers: [],
   providers: [
@@ -64,6 +67,7 @@ const ENV = process.env.NODE_ENV.trim();
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
     },
+    { provide: APP_INTERCEPTOR, useClass: DataResponseInterceptor },
     AccessTokenGuard,
   ],
 })

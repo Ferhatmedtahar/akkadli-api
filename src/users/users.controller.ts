@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Patch } from '@nestjs/common';
+import {
+  Body,
+  ClassSerializerInterceptor,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 // import { GetUserParamsDto } from './dtos/getUserParams.dto';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
@@ -14,16 +22,16 @@ export class UsersController {
     inject users service */
     private readonly usersService: UsersService,
   ) {}
-
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get('/me')
   @ApiOperation({ summary: 'get user by id' })
   @ApiProperty({ description: 'id of the user', example: 1 })
   public getUserMe(@ActiveUser() user: ActiveUserData) {
-    console.log(user);
     return this.usersService.findUserById(user.sub);
   }
 
   @Patch('/me')
+  @UseInterceptors(ClassSerializerInterceptor)
   public patchUsers(
     @Body() patchUserDto: PatchUserDto,
     @ActiveUser() user: ActiveUserData,

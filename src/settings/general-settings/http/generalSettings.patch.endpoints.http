@@ -1,8 +1,8 @@
 PATCH http://localhost:3000/settings/general-settings
-Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIzLCJlbWFpbCI6ImZlcmhhdHRhaGVyMDBAZ21haWwuY29tIiwiaWF0IjoxNzQxMzcwMTYwLCJleHAiOjE3NDEzNzM3NjAsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCJ9.EWSpPWyoDldWy71TO9882S9xn3gahrgHj7nvTAKExW0
+Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIzLCJlbWFpbCI6ImZlcmhhdHRhaGVyMDBAZ21haWwuY29tIiwiaWF0IjoxNzQxMzkyNjE4LCJleHAiOjE3NDEzOTYyMTgsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCJ9.uvh334MuD98EtL6X2o2781BZsvC1VbPoSgqdbVSQGC0
 Content-Type: application/json
 {
-"phoneNumber":"+213550123456",
+"phoneNumber":"+213550123450",
 "businessName":"My Business Name",
 "businessDescription":"My Business Description testing 123"
 }

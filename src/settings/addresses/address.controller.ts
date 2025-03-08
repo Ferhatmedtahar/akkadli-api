@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Patch } from '@nestjs/common';
+import {
+  Body,
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  Patch,
+  UseInterceptors,
+} from '@nestjs/common';
 import { PatchAddressDto } from './dtos/patchAddress.dto';
 import { AddressService } from './providers/address.service';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
@@ -12,10 +19,12 @@ export class AddressController {
   ) {}
 
   @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
   public async getAddressByUserId(@ActiveUser() user: ActiveUserData) {
     return this.addressService.getAddressByUserId(user.sub);
   }
   @Patch()
+  @UseInterceptors(ClassSerializerInterceptor)
   public async updateAddress(
     @Body() patchAddressDto: PatchAddressDto,
     @ActiveUser() user: ActiveUserData,

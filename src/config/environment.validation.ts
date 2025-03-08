@@ -24,6 +24,7 @@ export default joi.object({
   // PROFILE_API_KEY: joi.string().required(),
 
   PORT: joi.number().default(3000),
+  API_VERSION: joi.string().default('1.0.0'),
 
   JWT_SECRET: joi.string().required(),
   JWT_ACCESS_TOKEN_TTL: joi.string().required(),
@@ -33,4 +34,9 @@ export default joi.object({
 
   GOOGLE_CLIENT_SECRET: joi.string().required(),
   GOOGLE_CLIENT_ID: joi.string().required(),
+
+  MAIL_HOST: joi.string().required(),
+  MAIL_PORT: joi.number().required(),
+  SMTP_USERNAME: joi.string().required(),
+  SMTP_PASSWORD: joi.string().required(),
 });

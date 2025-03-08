@@ -12,5 +12,6 @@ import { PatchAddressProvider } from './providers/patch-address.provider';
   controllers: [AddressController],
   providers: [AddressService, PatchAddressProvider, GetAddressProvider],
   imports: [TypeOrmModule.forFeature([Address]), UsersModule],
+  exports: [AddressService],
 })
 export class AddressModule {}

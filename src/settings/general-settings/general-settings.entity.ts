@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { User } from 'src/users/user.entity';
 import {
   Column,
@@ -10,6 +11,7 @@ import {
 @Entity()
 export class GeneralSettings {
   @PrimaryGeneratedColumn()
+  @Exclude()
   id: number;
   @Column({
     type: 'varchar',

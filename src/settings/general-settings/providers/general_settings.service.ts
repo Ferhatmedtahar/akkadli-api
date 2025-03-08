@@ -14,9 +14,8 @@ export class GeneralSettingsService {
     private readonly patchGeneralSettings: PatchGeneralSettings,
   ) {}
 
-  public async getGeneralSettingsUser(user: ActiveUserData) {
-    console.log(user);
-    return this.getGeneralSettings.getGeneralSettingsUser(user.sub);
+  public async getGeneralSettingsUser(user: number) {
+    return this.getGeneralSettings.getGeneralSettingsUser(user);
   }
   public async updateGeneralSetting(
     patchGeneralSettingsDto: PatchGeneralSettingsDto,

@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Order } from 'src/order_product_managment/orders/order.entity';
 import { Product } from 'src/order_product_managment/products/product.entity';
 import { Address } from 'src/settings/addresses/address.entity';
@@ -18,6 +19,7 @@ import {
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
+  @Exclude()
   id: number;
 
   @Column({
@@ -29,9 +31,10 @@ export class User {
   @Column({
     type: 'varchar',
     length: 128,
-    nullable: false,
+    nullable: true,
   })
-  lastName: string;
+  lastName?: string;
+
   @Column({
     type: 'varchar',
     length: 128,
@@ -46,6 +49,7 @@ export class User {
     nullable: true,
     unique: true,
   })
+  @Exclude()
   googleId: string;
 
   @Column({

@@ -1,13 +1,11 @@
 import {
   BadRequestException,
   Body,
-  forwardRef,
-  Inject,
   Injectable,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthService } from 'src/auth/providers/auth.service';
+import { MailService } from 'src/mail/providers/mail.service';
 import { defaultAddress } from 'src/settings/addresses/constants/defaultAddress.const';
 import { defaultGeneralSettings } from 'src/settings/general-settings/constants/defaultGeneralSettings.const';
 import { Repository } from 'typeorm';
@@ -20,8 +18,10 @@ export class CreateGoogleUserProvider {
     /**inject user repository */
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    /**inject mail service */
+    private readonly mailService: MailService,
   ) {}
-  public async createUser(@Body() createUserDto: CreateUserDto) {
+  public async createUser(createUserDto: CreateUserDto) {
     let userExists = undefined;
     //check if user exists
     try {
@@ -69,6 +69,15 @@ export class CreateGoogleUserProvider {
           // cause: error,
         },
       );
+    }
+    try {
+      await this.mailService.sendUserWelcomeEmail(newUser);
+    } catch (error) {
+      console.log(error);
+      throw new RequestTimeoutException('Email Could not be sent', {
+        description: 'could not send email',
+        cause: error,
+      });
     }
 
     return newUser;

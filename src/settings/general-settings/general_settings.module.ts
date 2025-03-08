@@ -21,5 +21,6 @@ import { PatchGeneralSettings } from './providers/patch-general-settings';
     // ConfigModule.forFeature(jwtConfig),
     // JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
+  exports: [GeneralSettingsService],
 })
 export class GeneralSettingsModule {}
