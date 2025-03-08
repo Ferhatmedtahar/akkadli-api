@@ -41,7 +41,7 @@ export class UpdateDeliveryProvider {
         'Failed to fetch user: Database connection error',
         error.stack || error.message || 'No stack trace available',
       );
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Database connection failed, please try again later',
         { description: 'Error connecting to the database' },
       );
@@ -68,7 +68,7 @@ export class UpdateDeliveryProvider {
         'Failed to find delivery: Database error',
         error.stack || error.message || 'No stack trace available',
       );
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Failed to retrieve delivery, please try again later',
         { description: 'Error querying the database' },
       );

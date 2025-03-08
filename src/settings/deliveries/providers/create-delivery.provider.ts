@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Injectable,
+  InternalServerErrorException,
   Logger,
   RequestTimeoutException,
 } from '@nestjs/common';
@@ -35,7 +36,7 @@ export class CreateDeliveryProvider {
         apiId: createDeliveryDto.apiId,
       });
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -51,7 +52,7 @@ export class CreateDeliveryProvider {
     try {
       user = await this.usersService.findUserById(userId);
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -73,7 +74,7 @@ export class CreateDeliveryProvider {
     try {
       newDelivery = await this.deliveryRepository.save(newDelivery);
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',

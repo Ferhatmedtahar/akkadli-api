@@ -21,8 +21,27 @@ export function CreateApp(app: INestApplication): void {
     .setTermsOfService('https://example.com/terms')
     .setLicense('MIT', 'https://opensource.org/licenses/MIT')
     .addServer('http://localhost:3000/')
+    // .addBearerAuth(
+    //   {
+    //     type: 'apiKey',
+    //     scheme: 'Bearer',
+    //     bearerFormat: 'JWT',
+    //     name: 'Authorization',
+    //     description: 'Enter JWT token',
+    //     in: 'headers',
+    //   },
+    //   'access-token',
+    // )
     .build();
   //Instantiate document
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document);
+  SwaggerModule.setup('api-docs', app, document, {
+    // swaggerOptions: {
+    //   security: [
+    //     {
+    //       bearerAuth: ['access-token'],
+    //     },
+    //   ],
+    // },
+  });
 }
