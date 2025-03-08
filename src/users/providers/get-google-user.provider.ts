@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -53,7 +54,7 @@ export class GetGoogleUserProvider {
       );
     }
     if (!user) {
-      throw new BadRequestException('user Id does not exist');
+      throw new NotFoundException('user Id does not exist');
     }
     return user;
   }

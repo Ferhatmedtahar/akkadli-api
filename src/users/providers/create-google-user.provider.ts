@@ -1,7 +1,7 @@
 import {
   BadRequestException,
-  Body,
   Injectable,
+  InternalServerErrorException,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -31,7 +31,7 @@ export class CreateGoogleUserProvider {
     } catch (error) {
       //can save the details later on a log file
       console.log(error);
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',

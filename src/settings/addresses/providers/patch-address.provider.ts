@@ -1,4 +1,10 @@
-import { Injectable, RequestTimeoutException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  RequestTimeoutException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
@@ -21,21 +27,7 @@ export class PatchAddressProvider {
     try {
       user = await this.usersService.findUserById(userId);
     } catch {
-      throw new RequestTimeoutException(
-        'Unable to process the request at the moment, please try later',
-        {
-          description: 'error connecting to the database',
-          // cause: error,
-        },
-      );
-    }
-    //find the address using the user
-    try {
-      updatedAddress = await this.addressRepository.findOne({
-        where: { id: user.address.id },
-      });
-    } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -44,7 +36,31 @@ export class PatchAddressProvider {
       );
     }
 
-    console.log(updatedAddress, patchAddressDto);
+    if (!user) {
+      throw new BadRequestException('user not found', {
+        description: 'error finding the user',
+      });
+    }
+    //find the address using the user
+    try {
+      updatedAddress = await this.addressRepository.findOne({
+        where: { id: user.address.id },
+      });
+    } catch {
+      throw new InternalServerErrorException(
+        'Unable to process the request at the moment, please try later',
+        {
+          description: 'error connecting to the database',
+          // cause: error,
+        },
+      );
+    }
+
+    if (!updatedAddress) {
+      throw new BadRequestException('address not found', {
+        description: 'error finding the user',
+      });
+    }
     //update the address
     updatedAddress.wilaya = patchAddressDto.wilaya || updatedAddress.wilaya;
     updatedAddress.municipality =
@@ -55,9 +71,8 @@ export class PatchAddressProvider {
     //save the address
     try {
       updatedAddress = await this.addressRepository.save(updatedAddress);
-      console.log(updatedAddress);
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',

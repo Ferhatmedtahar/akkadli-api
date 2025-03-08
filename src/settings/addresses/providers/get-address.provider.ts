@@ -1,5 +1,7 @@
 import {
+  BadRequestException,
   Injectable,
+  InternalServerErrorException,
   RequestTimeoutException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -23,7 +25,7 @@ export class GetAddressProvider {
     try {
       user = await this.usersService.findUserById(userId);
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -31,11 +33,15 @@ export class GetAddressProvider {
       );
     }
 
-    //TODO replace the static user id with the id from the request after authentication
+    if (!user) {
+      throw new UnauthorizedException('user not found', {
+        description: 'error finding the user',
+      });
+    }
     try {
       address = await this.addressRepository.findOneBy({ id: user.address.id });
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -43,7 +49,7 @@ export class GetAddressProvider {
       );
     }
     if (!address) {
-      throw new UnauthorizedException('user not found', {
+      throw new BadRequestException('address not found', {
         description: 'error finding the user',
       });
     }

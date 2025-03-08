@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   RequestTimeoutException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -30,7 +31,7 @@ export class PatchGeneralSettings {
     try {
       user = await this.usersService.findUserById(userId);
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -50,7 +51,7 @@ export class PatchGeneralSettings {
         user.generalSettings.id,
       );
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -75,18 +76,13 @@ export class PatchGeneralSettings {
     try {
       savedGeneralSettings = await this.addressRepository.save(generalSettings);
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
           // cause: error,
         },
       );
-    }
-    if (!savedGeneralSettings) {
-      throw new UnauthorizedException('general settings not found', {
-        description: 'error finding the general settings',
-      });
     }
     if (!savedGeneralSettings) {
       throw new BadRequestException('General settings not updated', {

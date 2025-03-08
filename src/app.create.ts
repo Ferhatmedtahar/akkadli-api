@@ -17,7 +17,7 @@ export function CreateApp(app: INestApplication): void {
   const config = new DocumentBuilder()
     .setTitle('Akkadli api')
     .setDescription('Use the base API URL as http://localhost:3000/')
-    .setVersion('1.0')
+    .setVersion(process.env.API_VERSION || '1.0.0')
     .setTermsOfService('https://example.com/terms')
     .setLicense('MIT', 'https://opensource.org/licenses/MIT')
     .addServer('http://localhost:3000/')
