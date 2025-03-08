@@ -2,6 +2,7 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  InternalServerErrorException,
   OnModuleInit,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -51,7 +52,15 @@ export class GoogleAuthenticationService implements OnModuleInit {
       //check if user exists in our database using googeId
       try {
         user = await this.userService.findUserByGoogleId(googleId);
-      } catch (e) {}
+      } catch (e) {
+        throw new InternalServerErrorException(
+          'Unable to process the request',
+          {
+            description: 'error connecting to the database',
+            cause: e,
+          },
+        );
+      }
       //if google id exists generate tokens
 
       if (user) {
