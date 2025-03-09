@@ -8,10 +8,23 @@ import { ILogger } from '../interfaces/logger.interface';
 export class FileLoggerService implements ILogger, LoggerService {
   private readonly logFilePath = path.join(process.cwd(), 'logs', 'app.log');
 
-  log(message: string, context?: string, metadata?: Record<string, any>) {
-    this.writeLog('LOG', message, context, metadata);
+  logRequest(
+    message: string,
+    context?: string,
+    ip?: string,
+    metadata?: Record<string, any>,
+  ) {
+    this.writeLog('LOG', message, context, metadata, undefined, ip);
   }
 
+  log(
+    message: string,
+    context?: string,
+
+    metadata?: Record<string, any>,
+  ) {
+    this.writeLog('LOG', message, context, metadata);
+  }
   error(
     message: string,
     trace: string,
@@ -39,9 +52,11 @@ export class FileLoggerService implements ILogger, LoggerService {
     context?: string,
     metadata?: Record<string, any>,
     trace?: string,
+    ip?: string,
   ) {
+    if (!ip) ip = '';
     const timestamp = new Date().toISOString();
-    const logMessage = `${timestamp} [${level}] ${context ? `[${context}] ` : ''}${message}${
+    const logMessage = `${ip} ${timestamp} [${level}] ${context ? `[${context}] ` : ''}${message}${
       metadata ? ` ${JSON.stringify(metadata)}` : ''
     }${trace ? `\n${trace}` : ''}\n`;
 
@@ -58,7 +73,7 @@ export class FileLoggerService implements ILogger, LoggerService {
       }
     });
 
-    // Also log to console for development
-    console.log(logMessage);
+    // log to console for development
+    // console.log(logMessage);
   }
 }

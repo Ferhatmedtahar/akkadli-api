@@ -19,6 +19,7 @@ import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { PatchGeneralSettingsDto } from './dtos/patchGeneralSettings.dto';
 import { GeneralSettingsService } from './providers/general_settings.service';
 import { ILogger } from 'src/logger/interfaces/logger.interface';
+import { GetIp } from 'src/auth/decorators/get-ip.decorator.decorator';
 
 @Controller('settings/general-settings')
 @ApiTags('General Settings')
@@ -46,10 +47,14 @@ export class GeneralSettingsController {
     summary: 'Get General Settings of the current user',
   })
   @UseInterceptors(ClassSerializerInterceptor)
-  public async getGeneralSettings(@ActiveUser() user: ActiveUserData) {
-    this.logger.log(
+  public async getGeneralSettings(
+    @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
+  ) {
+    this.logger.logRequest(
       'get user general settings',
       GeneralSettingsController.name,
+      ip,
       {
         userId: user.sub,
       },
@@ -77,10 +82,12 @@ export class GeneralSettingsController {
   public async updateGeneralSettings(
     @Body() patchGeneralSettingsDto: PatchGeneralSettingsDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log(
+    this.logger.logRequest(
       'update user general settings',
       GeneralSettingsController.name,
+      ip,
       {
         userId: user.sub,
       },

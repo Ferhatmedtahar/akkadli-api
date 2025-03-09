@@ -1,5 +1,11 @@
 export interface ILogger {
   log(message: string, context?: string, metadata?: Record<string, any>): void;
+  logRequest(
+    message: string,
+    context?: string,
+    ip?: string,
+    metadata?: Record<string, any>,
+  ): void;
   error(
     message: string,
     trace: string,

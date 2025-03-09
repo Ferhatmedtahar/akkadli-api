@@ -13,6 +13,10 @@ export function CreateApp(app: INestApplication): void {
       },
     }),
   );
+  // {
+  //   origin: '*',
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  // }
   app.enableCors();
   const config = new DocumentBuilder()
     .setTitle('Akkadli api')

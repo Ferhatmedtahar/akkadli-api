@@ -13,6 +13,7 @@ import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { authType } from './enums/auth-type.enum';
 import { AuthService } from './providers/auth.service';
 import { ILogger } from 'src/logger/interfaces/logger.interface';
+import { GetIp } from './decorators/get-ip.decorator.decorator';
 
 @Controller('auth')
 @ApiTags(`Auth`)
@@ -37,10 +38,14 @@ export class AuthController {
     status: 401,
     description: 'user not found or invalid refresh token',
   })
-  public async refreshToken(@Body() refreshToken: RefreshTokenDto) {
-    this.logger.log(
+  public async refreshToken(
+    @Body() refreshToken: RefreshTokenDto,
+    @GetIp() ip: string,
+  ) {
+    this.logger.logRequest(
       `refreshToken: ${JSON.stringify(refreshToken)}`,
       AuthController.name,
+      ip,
     );
     return this.authService.refreshToken(refreshToken);
   }

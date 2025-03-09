@@ -12,6 +12,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
+import { GetIp } from 'src/auth/decorators/get-ip.decorator.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { SettingsService } from './settings.service';
@@ -39,8 +40,8 @@ export class SettingsController {
   })
   @ApiOperation({ summary: 'get user Address and General Settings' })
   @UseInterceptors(ClassSerializerInterceptor)
-  getSettings(@ActiveUser() user: ActiveUserData) {
-    this.logger.log('get user settings', SettingsController.name, {
+  getSettings(@ActiveUser() user: ActiveUserData, @GetIp() ip: string) {
+    this.logger.logRequest('get user settings', SettingsController.name, ip, {
       userId: user.sub,
     });
     return this.settingsService.getUserSettings(user.sub);

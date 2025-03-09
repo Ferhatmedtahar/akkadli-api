@@ -16,8 +16,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-// import { GetUserParamsDto } from './dtos/getUserParams.dto';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
+import { GetIp } from 'src/auth/decorators/get-ip.decorator.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { PatchUserDto } from './dtos/patchUser.dto';
@@ -33,6 +33,7 @@ export class UsersController {
     /**inject logger service */
     @Inject('ILogger') private readonly logger: ILogger,
   ) {}
+
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('/me')
   @ApiBearerAuth('access-token')
@@ -51,8 +52,10 @@ export class UsersController {
       'Unable to process the request at the moment, please try later',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  public getUserMe(@ActiveUser() user: ActiveUserData) {
-    this.logger.log('get user me', UsersController.name, { userId: user.sub });
+  public getUserMe(@ActiveUser() user: ActiveUserData, @GetIp() ip: string) {
+    this.logger.logRequest('get user me', UsersController.name, ip, {
+      userId: user.sub,
+    });
     return this.usersService.findUserById(user.sub);
   }
 
@@ -78,8 +81,9 @@ export class UsersController {
   public patchUsers(
     @Body() patchUserDto: PatchUserDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('update user me', UsersController.name, {
+    this.logger.logRequest('update user me', UsersController.name, ip, {
       userId: user.sub,
     });
     return this.usersService.udpateUser(patchUserDto, user);
@@ -93,8 +97,8 @@ export class UsersController {
     description: 'can not delete a user',
   })
   @UseInterceptors(ClassSerializerInterceptor)
-  public deleteUsers(@ActiveUser() user: ActiveUserData) {
-    this.logger.log('delete user me', UsersController.name, {
+  public deleteUsers(@ActiveUser() user: ActiveUserData, @GetIp() ip: string) {
+    this.logger.logRequest('delete user me', UsersController.name, ip, {
       userId: user.sub,
     });
     return this.usersService.delete(user);

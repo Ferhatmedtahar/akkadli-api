@@ -25,6 +25,7 @@ import { GetDeliveriesDto } from './dtos/getDeliveries.dto';
 import { GetDeliveryParamsDto } from './dtos/getDeliveryParams.dto';
 import { PatchDeliveryDto } from './dtos/patchDeliveries.dto';
 import { DeliveryService } from './providers/delivery.service';
+import { GetIp } from 'src/auth/decorators/get-ip.decorator.decorator';
 
 @Controller('settings/deliveries')
 export class DeliveriesController {
@@ -62,8 +63,9 @@ export class DeliveriesController {
   public createDelivery(
     @Body() createDeliveryDto: CreateDeliveryDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('create delivery', DeliveriesController.name, {
+    this.logger.logRequest('create delivery', DeliveriesController.name, ip, {
       user: user.sub,
     });
     return this.deliveriesService.createDelivery(createDeliveryDto, user.sub);
@@ -90,10 +92,12 @@ export class DeliveriesController {
   public findAllByUserId(
     @Query() deliveriesQuery: GetDeliveriesDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log(
+    this.logger.logRequest(
       'find all deliveries by user id',
       DeliveriesController.name,
+      ip,
       {
         user: user.sub,
       },
@@ -104,13 +108,6 @@ export class DeliveriesController {
   @Get('/:id')
   @ApiOperation({
     summary: 'get delivery by id',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'id of the delivery',
-    example: '1',
-    type: 'number',
-    required: false,
   })
   @ApiBearerAuth('access-token')
   @ApiResponse({
@@ -133,21 +130,15 @@ export class DeliveriesController {
   public findOneById(
     @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('find one delivery', DeliveriesController.name, {
+    this.logger.logRequest('find one delivery', DeliveriesController.name, ip, {
       user: user.sub,
     });
     return this.deliveriesService.findOneById(getDeliveryParamsDto, user.sub);
   }
 
   @Patch('/:id')
-  @ApiParam({
-    name: 'id',
-    description: 'id of the delivery',
-    example: '1',
-    type: 'number',
-    required: false,
-  })
   @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
@@ -173,10 +164,16 @@ export class DeliveriesController {
     @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
     @Body() patchDeliveryDto: PatchDeliveryDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('update one delivery', DeliveriesController.name, {
-      user: user.sub,
-    });
+    this.logger.logRequest(
+      'update one delivery',
+      DeliveriesController.name,
+      ip,
+      {
+        user: user.sub,
+      },
+    );
     return this.deliveriesService.updateDelivery(
       getDeliveryParamsDto,
       patchDeliveryDto,
@@ -186,13 +183,6 @@ export class DeliveriesController {
   @Delete('/:id')
   @ApiOperation({
     summary: 'delete delivery by id',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'id of the delivery',
-    example: '1',
-    type: 'number',
-    required: false,
   })
   @ApiBearerAuth('access-token')
   @ApiResponse({
@@ -215,10 +205,16 @@ export class DeliveriesController {
   public deleteDelivery(
     @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('delete one delivery', DeliveriesController.name, {
-      user: user.sub,
-    });
+    this.logger.logRequest(
+      'delete one delivery',
+      DeliveriesController.name,
+      ip,
+      {
+        user: user.sub,
+      },
+    );
     return this.deliveriesService.deleteDelivery(
       getDeliveryParamsDto,
       user.sub,

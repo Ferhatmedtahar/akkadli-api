@@ -22,6 +22,7 @@ import { GeneralSettingsModule } from './settings/general-settings/general_setti
 import { SettingsModule } from './settings/settings.module';
 import { UsersModule } from './users/users.module';
 import { LoggerModule } from './logger/logger.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 const ENV = process.env.NODE_ENV.trim();
 @Module({
@@ -62,6 +63,14 @@ const ENV = process.env.NODE_ENV.trim();
     PaginationModule,
     MailModule,
     LoggerModule,
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 15,
+        },
+      ],
+    }),
   ],
   controllers: [],
   providers: [
@@ -69,8 +78,12 @@ const ENV = process.env.NODE_ENV.trim();
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
     },
-    { provide: APP_INTERCEPTOR, useClass: DataResponseInterceptor },
     AccessTokenGuard,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    { provide: APP_INTERCEPTOR, useClass: DataResponseInterceptor },
   ],
 })
 export class AppModule {}

@@ -23,6 +23,7 @@ import { GetProductParamsDto } from './dtos/getProductParams.dto';
 import { GetProductsDto } from './dtos/getProducts.dto';
 import { PatchProductDto } from './dtos/patchProduct.dto';
 import { ProductsService } from './providers/products.service';
+import { GetIp } from 'src/auth/decorators/get-ip.decorator.decorator';
 
 @Controller('products')
 @ApiTags('Products')
@@ -59,8 +60,9 @@ export class ProductsController {
   public create(
     @Body() createProductDto: CreateProductDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('create product', ProductsController.name, {
+    this.logger.logRequest('create product', ProductsController.name, ip, {
       user: user.sub,
     });
     return this.productsService.createProduct(createProductDto, user.sub);
@@ -92,8 +94,9 @@ export class ProductsController {
   public getProducts(
     @Query() productsQuery: GetProductsDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('get products', ProductsController.name, {
+    this.logger.logRequest('get products', ProductsController.name, ip, {
       user: user.sub,
     });
     return this.productsService.findAll(productsQuery, user.sub);
@@ -124,8 +127,9 @@ export class ProductsController {
   public getProductById(
     @Param() getProductParamsDto: GetProductParamsDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('get product by id', ProductsController.name, {
+    this.logger.logRequest('get product by id', ProductsController.name, ip, {
       user: user.sub,
     });
     return this.productsService.getProductById(getProductParamsDto, user.sub);
@@ -156,10 +160,16 @@ export class ProductsController {
     @Body() updateProductDto: PatchProductDto,
     @Param() getProductParamsDto: GetProductParamsDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('update product by id', ProductsController.name, {
-      user: user.sub,
-    });
+    this.logger.logRequest(
+      'update product by id',
+      ProductsController.name,
+      ip,
+      {
+        user: user.sub,
+      },
+    );
 
     return this.productsService.updateProduct(
       getProductParamsDto,
@@ -193,10 +203,16 @@ export class ProductsController {
   public deleteProduct(
     @Param() getProductParamsDto: GetProductParamsDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('delete product by id', ProductsController.name, {
-      user: user.sub,
-    });
+    this.logger.logRequest(
+      'delete product by id',
+      ProductsController.name,
+      ip,
+      {
+        user: user.sub,
+      },
+    );
 
     return this.productsService.deleteProduct(getProductParamsDto, user.sub);
   }

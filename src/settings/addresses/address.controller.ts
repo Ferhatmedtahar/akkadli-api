@@ -9,10 +9,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
+import { GetIp } from 'src/auth/decorators/get-ip.decorator.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { PatchAddressDto } from './dtos/patchAddress.dto';
 import { AddressService } from './providers/address.service';
-import { ILogger } from 'src/logger/interfaces/logger.interface';
 
 @Controller('settings/address')
 export class AddressController {
@@ -35,10 +36,18 @@ export class AddressController {
   @ApiResponse({ status: 200, description: 'address found' })
   @ApiOperation({ summary: 'get address by user id' })
   @UseInterceptors(ClassSerializerInterceptor)
-  public async getAddressByUserId(@ActiveUser() user: ActiveUserData) {
-    this.logger.log('get address by user id', AddressController.name, {
-      userId: user.sub,
-    });
+  public async getAddressByUserId(
+    @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
+  ) {
+    this.logger.logRequest(
+      'get address by user id',
+      AddressController.name,
+      ip,
+      {
+        userId: user.sub,
+      },
+    );
     return this.addressService.getAddressByUserId(user.sub);
   }
 
@@ -56,10 +65,16 @@ export class AddressController {
   public async updateAddress(
     @Body() patchAddressDto: PatchAddressDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('update address by user id', AddressController.name, {
-      userId: user.sub,
-    });
+    this.logger.logRequest(
+      'update address by user id',
+      AddressController.name,
+      ip,
+      {
+        userId: user.sub,
+      },
+    );
     return this.addressService.updateAddress(patchAddressDto, user.sub);
   }
 }

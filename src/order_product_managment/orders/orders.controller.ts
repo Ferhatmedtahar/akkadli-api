@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
+import { GetIp } from 'src/auth/decorators/get-ip.decorator.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { CreateOrderDto } from './dtos/createOrder.dto';
@@ -61,8 +62,11 @@ export class OrdersController {
   public createOrder(
     @Body() createOrderDto: CreateOrderDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('create order', OrdersController.name, { user: user.sub });
+    this.logger.logRequest('create order', OrdersController.name, ip, {
+      user: user.sub,
+    });
     return this.orderService.createOrder(createOrderDto, user.sub);
   }
 
@@ -87,8 +91,9 @@ export class OrdersController {
   public getOrderbyId(
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('get order by id ', OrdersController.name, {
+    this.logger.logRequest('get order by id ', OrdersController.name, ip, {
       user: user.sub,
     });
 
@@ -120,8 +125,9 @@ export class OrdersController {
   public getAllOrders(
     @Query() ordersQuery: GetOrdersDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('get all orders ', OrdersController.name, {
+    this.logger.logRequest('get all orders ', OrdersController.name, ip, {
       user: user.sub,
     });
     return this.orderService.getAllOrders(ordersQuery, user.sub);
@@ -154,8 +160,9 @@ export class OrdersController {
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @Body() updateOrderDto: PatchOrderDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('update order by id ', OrdersController.name, {
+    this.logger.logRequest('update order by id ', OrdersController.name, ip, {
       user: user.sub,
     });
     return this.orderService.updateOrder(
@@ -194,8 +201,9 @@ export class OrdersController {
   public deleteOrder(
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('delete order by id ', OrdersController.name, {
+    this.logger.logRequest('delete order by id ', OrdersController.name, ip, {
       user: user.sub,
     });
     return this.orderService.deleteOrder(getOrderParamsDto, user.sub);
@@ -230,10 +238,16 @@ export class OrdersController {
   public softDeleteOrder(
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @ActiveUser() user: ActiveUserData,
+    @GetIp() ip: string,
   ) {
-    this.logger.log('soft delete order by id ', OrdersController.name, {
-      user: user.sub,
-    });
+    this.logger.logRequest(
+      'soft delete order by id ',
+      OrdersController.name,
+      ip,
+      {
+        user: user.sub,
+      },
+    );
     return this.orderService.softDeleteOrder(getOrderParamsDto, user.sub);
   }
 }
