@@ -8,7 +8,12 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { CreateOrderDto } from './dtos/createOrder.dto';
@@ -28,14 +33,7 @@ export class OrdersController {
   @ApiOperation({
     summary: 'create order',
   })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 201,
     description: 'The order has been successfully created.',
@@ -64,14 +62,7 @@ export class OrdersController {
   }
 
   @Get('/:id')
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'get order by id and user id ',
   })
@@ -96,14 +87,7 @@ export class OrdersController {
   }
 
   @Get()
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
     description:
@@ -135,14 +119,7 @@ export class OrdersController {
   @ApiOperation({
     summary: 'update order by id and user id ',
   })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
@@ -174,14 +151,7 @@ export class OrdersController {
   }
 
   @Delete('/:id')
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'delete order by id and user id ',
   })
@@ -214,14 +184,7 @@ export class OrdersController {
   }
 
   @Delete('soft-delete/:id')
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'delete order by id and user id ',
   })

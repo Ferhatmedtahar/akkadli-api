@@ -9,7 +9,13 @@ import {
   Patch,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 // import { GetUserParamsDto } from './dtos/getUserParams.dto';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
@@ -26,6 +32,7 @@ export class UsersController {
   ) {}
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('/me')
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'get the current user' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -41,14 +48,6 @@ export class UsersController {
       'Unable to process the request at the moment, please try later',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
   public getUserMe(@ActiveUser() user: ActiveUserData) {
     return this.usersService.findUserById(user.sub);
   }
@@ -70,14 +69,7 @@ export class UsersController {
       'Unable to process the request at the moment, please try later',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @UseInterceptors(ClassSerializerInterceptor)
   public patchUsers(
     @Body() patchUserDto: PatchUserDto,
@@ -88,14 +80,7 @@ export class UsersController {
 
   @Delete('/me')
   @ApiOperation({ summary: 'delete the current user' })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: HttpStatus.METHOD_NOT_ALLOWED,
     description: 'can not delete a user',

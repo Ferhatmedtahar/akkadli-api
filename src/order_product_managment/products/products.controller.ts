@@ -8,7 +8,12 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { CreateProductDto } from './dtos/createProduct.dto';
@@ -26,14 +31,7 @@ export class ProductsController {
   ) {}
 
   @Post()
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
     description:
@@ -62,14 +60,7 @@ export class ProductsController {
   }
   // @Auth(authType.None)
   @Get()
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
     description:
@@ -98,14 +89,7 @@ export class ProductsController {
   }
 
   @Get('/:id')
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
     description:
@@ -136,14 +120,7 @@ export class ProductsController {
   @ApiOperation({
     summary: 'Update product by id and user id',
   })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
     description:
@@ -181,14 +158,7 @@ export class ProductsController {
     status: 401,
     description: 'Unauthorized',
   })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
     description:

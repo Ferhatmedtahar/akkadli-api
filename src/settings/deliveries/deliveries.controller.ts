@@ -10,6 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiHeader,
   ApiOperation,
   ApiParam,
@@ -62,15 +63,7 @@ export class DeliveriesController {
   }
 
   @Get()
-  // @ApiBearerAuth('access-token')
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
     description:
@@ -105,14 +98,7 @@ export class DeliveriesController {
     type: 'number',
     required: false,
   })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
     description:
@@ -145,14 +131,7 @@ export class DeliveriesController {
     type: 'number',
     required: false,
   })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
     description:
@@ -195,14 +174,7 @@ export class DeliveriesController {
     type: 'number',
     required: false,
   })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-    required: true,
-
-    example:
-      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-  })
+  @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
     description:
