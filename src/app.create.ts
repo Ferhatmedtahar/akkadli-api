@@ -35,13 +35,5 @@ export function CreateApp(app: INestApplication): void {
     .build();
   //Instantiate document
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document, {
-    // swaggerOptions: {
-    //   security: [
-    //     {
-    //       bearerAuth: ['access-token'],
-    //     },
-    //   ],
-    // },
-  });
+  SwaggerModule.setup('api-docs', app, document);
 }
