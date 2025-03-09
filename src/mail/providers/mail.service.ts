@@ -9,7 +9,6 @@ export class MailService {
     private readonly mailerService: MailerService,
   ) {}
   public async sendUserWelcomeEmail(user: User) {
-    console.log(user);
     return await this.mailerService.sendMail({
       from: 'Onboarding Team <akkadli@gmail.com>',
       to: user.email,

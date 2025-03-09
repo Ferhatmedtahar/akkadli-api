@@ -1,11 +1,12 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
-  RequestTimeoutException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { PatchGeneralSettingsDto } from '../dtos/patchGeneralSettings.dto';
@@ -18,7 +19,9 @@ export class PatchGeneralSettings {
     private readonly usersService: UsersService,
     /**inject address repository */
     @InjectRepository(GeneralSettings)
-    private readonly addressRepository: Repository<GeneralSettings>,
+    private readonly GeneralSettingsRepository: Repository<GeneralSettings>,
+    /**inject logger serivce */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   public async updateGeneralSettings(
     patchAddressDto: PatchGeneralSettingsDto,
@@ -30,7 +33,11 @@ export class PatchGeneralSettings {
     //find the user using the user service and id from the auth token
     try {
       user = await this.usersService.findUserById(userId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to find user: Database error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -40,6 +47,7 @@ export class PatchGeneralSettings {
       );
     }
     if (!user) {
+      this.logger.warn(`User not found for ID ${userId} `);
       throw new UnauthorizedException('user not found', {
         description: 'error finding the user',
       });
@@ -47,10 +55,14 @@ export class PatchGeneralSettings {
 
     //find the address using the user
     try {
-      generalSettings = await this.addressRepository.findOneById(
-        user.generalSettings.id,
+      generalSettings = await this.GeneralSettingsRepository.findOneBy({
+        id: user.generalSettings.id,
+      });
+    } catch (error) {
+      this.logger.error(
+        'Failed to find general settings: Database error',
+        error.stack || error.message || 'No stack trace available',
       );
-    } catch {
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -61,6 +73,7 @@ export class PatchGeneralSettings {
     }
 
     if (!generalSettings) {
+      this.logger.warn(`General settings not found for ID ${userId} `);
       throw new UnauthorizedException('general settings not found', {
         description: 'error finding the general settings',
       });
@@ -74,8 +87,13 @@ export class PatchGeneralSettings {
       patchAddressDto.phoneNumber ?? generalSettings.phoneNumber;
 
     try {
-      savedGeneralSettings = await this.addressRepository.save(generalSettings);
-    } catch {
+      savedGeneralSettings =
+        await this.GeneralSettingsRepository.save(generalSettings);
+    } catch (error) {
+      this.logger.error(
+        'Failed to update general settings: Database error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -85,6 +103,7 @@ export class PatchGeneralSettings {
       );
     }
     if (!savedGeneralSettings) {
+      this.logger.warn(`General settings not updated for ID ${userId} `);
       throw new BadRequestException('General settings not updated', {
         description: 'error updating the general settings',
       });

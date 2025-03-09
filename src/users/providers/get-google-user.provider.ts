@@ -1,10 +1,11 @@
 import {
-  BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { Repository } from 'typeorm';
 import { User } from '../user.entity';
 
@@ -14,12 +15,18 @@ export class GetGoogleUserProvider {
     /**inject user repository */
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   public async findUserByGoogleId(googleId: string): Promise<User> {
     let user = undefined;
     try {
       user = await this.userRepository.findOne({ where: { googleId } });
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to find user: Database error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
         {
@@ -44,7 +51,11 @@ export class GetGoogleUserProvider {
           generalSettings: true,
         },
       });
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to find user: Database error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
         {
@@ -54,6 +65,7 @@ export class GetGoogleUserProvider {
       );
     }
     if (!user) {
+      this.logger.warn(`User not found for ID ${id} `);
       throw new NotFoundException('user Id does not exist');
     }
     return user;

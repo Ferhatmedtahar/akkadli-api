@@ -21,6 +21,7 @@ import { DeliveriesModule } from './settings/deliveries/deliveries.module';
 import { GeneralSettingsModule } from './settings/general-settings/general_settings.module';
 import { SettingsModule } from './settings/settings.module';
 import { UsersModule } from './users/users.module';
+import { LoggerModule } from './logger/logger.module';
 
 const ENV = process.env.NODE_ENV.trim();
 @Module({
@@ -60,6 +61,7 @@ const ENV = process.env.NODE_ENV.trim();
     OrderProductModule,
     PaginationModule,
     MailModule,
+    LoggerModule,
   ],
   controllers: [],
   providers: [

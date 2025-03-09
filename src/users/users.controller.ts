@@ -6,12 +6,12 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Patch,
   UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiHeader,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -19,6 +19,7 @@ import {
 // import { GetUserParamsDto } from './dtos/getUserParams.dto';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { PatchUserDto } from './dtos/patchUser.dto';
 import { UsersService } from './providers/users.service';
 
@@ -29,6 +30,8 @@ export class UsersController {
     /*
     inject users service */
     private readonly usersService: UsersService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('/me')
@@ -49,6 +52,7 @@ export class UsersController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   public getUserMe(@ActiveUser() user: ActiveUserData) {
+    this.logger.log('get user me', UsersController.name, { userId: user.sub });
     return this.usersService.findUserById(user.sub);
   }
 
@@ -75,6 +79,9 @@ export class UsersController {
     @Body() patchUserDto: PatchUserDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('update user me', UsersController.name, {
+      userId: user.sub,
+    });
     return this.usersService.udpateUser(patchUserDto, user);
   }
 
@@ -87,6 +94,9 @@ export class UsersController {
   })
   @UseInterceptors(ClassSerializerInterceptor)
   public deleteUsers(@ActiveUser() user: ActiveUserData) {
+    this.logger.log('delete user me', UsersController.name, {
+      userId: user.sub,
+    });
     return this.usersService.delete(user);
   }
   // @Get('/:id')

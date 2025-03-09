@@ -1,10 +1,11 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
-  RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { MailService } from 'src/mail/providers/mail.service';
 import { defaultAddress } from 'src/settings/addresses/constants/defaultAddress.const';
 import { defaultGeneralSettings } from 'src/settings/general-settings/constants/defaultGeneralSettings.const';
@@ -20,6 +21,8 @@ export class CreateGoogleUserProvider {
     private readonly userRepository: Repository<User>,
     /**inject mail service */
     private readonly mailService: MailService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   public async createUser(createUserDto: CreateUserDto) {
     let userExists = undefined;
@@ -29,8 +32,10 @@ export class CreateGoogleUserProvider {
         email: createUserDto.email,
       });
     } catch (error) {
-      //can save the details later on a log file
-      console.log(error);
+      this.logger.error(
+        'Failed to find user: Database error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -41,6 +46,10 @@ export class CreateGoogleUserProvider {
     }
 
     if (userExists) {
+      this.logger.error(
+        'Failed to create user: User already exists',
+        userExists.stack || userExists.message || 'No stack trace available',
+      );
       throw new BadRequestException(
         'The user already exists, please check your email.',
       );
@@ -61,8 +70,11 @@ export class CreateGoogleUserProvider {
     try {
       newUser = await this.userRepository.save(newUser);
     } catch (e) {
-      console.log(e);
-      throw new RequestTimeoutException(
+      this.logger.error(
+        'Failed to create user: Database error',
+        e.stack || e.message || 'No stack trace available',
+      );
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -73,8 +85,8 @@ export class CreateGoogleUserProvider {
     try {
       await this.mailService.sendUserWelcomeEmail(newUser);
     } catch (error) {
-      console.log(error);
-      throw new RequestTimeoutException('Email Could not be sent', {
+      this.logger.error('Failed to send email', error.stack || error.message);
+      throw new InternalServerErrorException('Email Could not be sent', {
         description: 'could not send email',
         cause: error,
       });

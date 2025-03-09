@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Inject,
   Patch,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,6 +18,7 @@ import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { PatchGeneralSettingsDto } from './dtos/patchGeneralSettings.dto';
 import { GeneralSettingsService } from './providers/general_settings.service';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 
 @Controller('settings/general-settings')
 @ApiTags('General Settings')
@@ -24,6 +26,8 @@ export class GeneralSettingsController {
   constructor(
     /**inject general settings service */
     private readonly generalSettingsService: GeneralSettingsService,
+    /**inject logger serivce */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   // @UseGuards(AccessTokenGuard)
   @Get()
@@ -43,6 +47,13 @@ export class GeneralSettingsController {
   })
   @UseInterceptors(ClassSerializerInterceptor)
   public async getGeneralSettings(@ActiveUser() user: ActiveUserData) {
+    this.logger.log(
+      'get user general settings',
+      GeneralSettingsController.name,
+      {
+        userId: user.sub,
+      },
+    );
     return this.generalSettingsService.getGeneralSettingsUser(user.sub);
   }
 
@@ -67,6 +78,13 @@ export class GeneralSettingsController {
     @Body() patchGeneralSettingsDto: PatchGeneralSettingsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log(
+      'update user general settings',
+      GeneralSettingsController.name,
+      {
+        userId: user.sub,
+      },
+    );
     return this.generalSettingsService.updateGeneralSetting(
       patchGeneralSettingsDto,
       user,

@@ -83,7 +83,6 @@ export class GetProductProvider {
     let products = undefined;
     try {
       user = await this.usersService.findUserById(userId);
-      console.log(user);
     } catch {
       throw new RequestTimeoutException(
         'Unable to process the request at the moment, please try later',
