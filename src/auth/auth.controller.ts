@@ -1,10 +1,18 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Post,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Auth } from './decorators/auth.decorator';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 
 import { authType } from './enums/auth-type.enum';
 import { AuthService } from './providers/auth.service';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 
 @Controller('auth')
 @ApiTags(`Auth`)
@@ -12,6 +20,8 @@ export class AuthController {
   constructor(
     /**inject auth service */
     private readonly authService: AuthService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   @Post('refresh-tokens')
   @HttpCode(HttpStatus.OK)
@@ -28,6 +38,10 @@ export class AuthController {
     description: 'user not found or invalid refresh token',
   })
   public async refreshToken(@Body() refreshToken: RefreshTokenDto) {
+    this.logger.log(
+      `refreshToken: ${JSON.stringify(refreshToken)}`,
+      AuthController.name,
+    );
     return this.authService.refreshToken(refreshToken);
   }
 }

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { UsersService } from 'src/users/providers/users.service';
 import jwtConfig from '../config/jwt.config';
 import { RefreshTokenDto } from '../dtos/refresh-token.dto';
@@ -25,6 +26,8 @@ export class RefreshTokenProvider {
     /**inject  config service*/
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   public async refreshToken(refreshTokendto: RefreshTokenDto) {
     //verify the refresh token is valid using jwt service
@@ -42,7 +45,13 @@ export class RefreshTokenProvider {
       //based on the id , we will fetch the user
       user = await this.userService.findUserById(sub);
     } catch (error) {
-      throw new UnauthorizedException(error);
+      this.logger.error(
+        'user not found',
+        error.stack || error.message || 'No stack trace available',
+      );
+      throw new UnauthorizedException('user not found', {
+        description: 'user could not be found using the provided id',
+      });
     }
     //create the tokens
     return await this.generateTokenProvider.generateTokens(user);

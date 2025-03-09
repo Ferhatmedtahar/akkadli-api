@@ -13,6 +13,7 @@ import { GenerateTokenProvider } from 'src/auth/providers/generate-token.provide
 import { CreateUserDto } from 'src/users/dtos/createUser.dto';
 import { UsersService } from 'src/users/providers/users.service';
 import { GoogleTokenDto } from '../dtos/google-token.dto';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 
 @Injectable()
 export class GoogleAuthenticationService implements OnModuleInit {
@@ -26,6 +27,8 @@ export class GoogleAuthenticationService implements OnModuleInit {
     private readonly userService: UsersService,
     /**generate token provider */
     private readonly generateTokenProvider: GenerateTokenProvider,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   onModuleInit() {
     const clientId = this.jwtConfiguration.googleClientId;
@@ -53,6 +56,10 @@ export class GoogleAuthenticationService implements OnModuleInit {
       try {
         user = await this.userService.findUserByGoogleId(googleId);
       } catch (e) {
+        this.logger.error(
+          'Database error while finding user',
+          e.stack || e.message || 'No stack trace available',
+        );
         throw new InternalServerErrorException(
           'Unable to process the request',
           {
@@ -79,6 +86,10 @@ export class GoogleAuthenticationService implements OnModuleInit {
         return this.generateTokenProvider.generateTokens(newUser);
       }
     } catch (error) {
+      this.logger.error(
+        'Database error while  creating new user',
+        error.stack || error.message || 'No stack trace available',
+      );
       //if error send unauthorized
       throw new UnauthorizedException('User not found, please signup', {
         description: 'error connecting to db',

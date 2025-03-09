@@ -1,5 +1,6 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { Auth } from '../decorators/auth.decorator';
 import { authType } from '../enums/auth-type.enum';
 import { GoogleTokenDto } from './dtos/google-token.dto';
@@ -11,6 +12,8 @@ export class GoogleAuthenticationController {
   constructor(
     /**inject google authentication service */
     private readonly googleAuthenticationService: GoogleAuthenticationService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   @Post()
   @Auth(authType.None)
@@ -22,6 +25,10 @@ export class GoogleAuthenticationController {
   })
   @ApiOperation({ summary: 'google authentication' })
   public async googleAuthentication(@Body() googleTokenDto: GoogleTokenDto) {
+    this.logger.log(
+      'google authentication',
+      GoogleAuthenticationController.name,
+    );
     return this.googleAuthenticationService.authenticate(googleTokenDto);
   }
 }

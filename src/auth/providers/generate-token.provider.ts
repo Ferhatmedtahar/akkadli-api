@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { User } from 'src/users/user.entity';
 import jwtConfig from '../config/jwt.config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
@@ -14,6 +15,8 @@ export class GenerateTokenProvider {
     /**inject  config service*/
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   public async signToken<T>(userId: number, expiresIn: number, payload?: T) {
     return await this.jwtService.signAsync(
@@ -40,7 +43,9 @@ export class GenerateTokenProvider {
       //generate the refresh token
       await this.signToken(user.id, this.jwtConfiguration.refreshTokenTTL),
     ]);
-    console.log({ accessToken, refreshToken });
+    this.logger.log('generate tokens for user', GenerateTokenProvider.name, {
+      user: user.id,
+    });
     return {
       accessToken,
       refreshToken,
