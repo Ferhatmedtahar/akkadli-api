@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   RequestTimeoutException,
 } from '@nestjs/common';
@@ -35,7 +36,7 @@ export class UpdateProductProvider {
     try {
       user = await this.usersService.findUserById(userId);
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -51,7 +52,7 @@ export class UpdateProductProvider {
         relations: { orderProducts: true },
       });
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -85,7 +86,7 @@ export class UpdateProductProvider {
       totalOrderedQuantity =
         await this.orderProductService.getTotalOrderedQuantity(product.id);
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -130,7 +131,7 @@ export class UpdateProductProvider {
       product = await this.productsRepository.save(product);
       return product;
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',

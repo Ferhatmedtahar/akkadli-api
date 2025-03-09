@@ -8,7 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { CreateOrderDto } from './dtos/createOrder.dto';
@@ -25,6 +25,37 @@ export class OrdersController {
     private readonly orderService: OrdersService,
   ) {}
   @Post()
+  @ApiOperation({
+    summary: 'create order',
+  })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+    required: true,
+
+    example:
+      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'The order has been successfully created.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'unable to create order',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Order cannot be empty, or missing quantity',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+  })
   public createOrder(
     @Body() createOrderDto: CreateOrderDto,
     @ActiveUser() user: ActiveUserData,
@@ -33,6 +64,30 @@ export class OrdersController {
   }
 
   @Get('/:id')
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+    required: true,
+
+    example:
+      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  })
+  @ApiOperation({
+    summary: 'get order by id and user id ',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Unable to process the request and get the order, please try later',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'user or order not found',
+  })
   public getOrderbyId(
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @ActiveUser() user: ActiveUserData,
@@ -41,6 +96,34 @@ export class OrdersController {
   }
 
   @Get()
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+    required: true,
+
+    example:
+      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Unable to process the request at the moment, please try later',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'user not found',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'list of orders',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiOperation({
+    summary: 'get all orders by user',
+  })
   public getAllOrders(
     @Query() ordersQuery: GetOrdersDto,
     @ActiveUser() user: ActiveUserData,
@@ -49,6 +132,35 @@ export class OrdersController {
   }
 
   @Patch('/:id')
+  @ApiOperation({
+    summary: 'update order by id and user id ',
+  })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+    required: true,
+
+    example:
+      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Unable to process the request and update the order, please try later',
+  })
+  @ApiResponse({
+    status: 404,
+    description:
+      'User or Order not found , cant update order if status is not pending',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'order updated successfully',
+  })
   public updateOrder(
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @Body() updateOrderDto: PatchOrderDto,
@@ -62,13 +174,78 @@ export class OrdersController {
   }
 
   @Delete('/:id')
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+    required: true,
+
+    example:
+      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  })
+  @ApiOperation({
+    summary: 'delete order by id and user id ',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Unable to process the request and delete the order, please try later',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User or Order not found',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'order deleted successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'order status is not pending',
+  })
   public deleteOrder(
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
     return this.orderService.deleteOrder(getOrderParamsDto, user.sub);
   }
+
   @Delete('soft-delete/:id')
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+    required: true,
+
+    example:
+      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  })
+  @ApiOperation({
+    summary: 'delete order by id and user id ',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Unable to process the request and delete the order, please try later',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User or Order not found',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'order deleted successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'order status is not pending',
+  })
   public softDeleteOrder(
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @ActiveUser() user: ActiveUserData,

@@ -8,7 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { CreateProductDto } from './dtos/createProduct.dto';
@@ -26,6 +26,34 @@ export class ProductsController {
   ) {}
 
   @Post()
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+    required: true,
+
+    example:
+      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Unable to process the request at the moment, please try later',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Product created successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request, invalid request',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiOperation({
+    summary: 'create product',
+  })
   public create(
     @Body() createProductDto: CreateProductDto,
     @ActiveUser() user: ActiveUserData,
@@ -34,15 +62,70 @@ export class ProductsController {
   }
   // @Auth(authType.None)
   @Get()
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+    required: true,
+
+    example:
+      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Unable to process the request at the moment, please try later',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'user not found',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'list of products',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiOperation({
+    summary: 'Get all products of a user',
+  })
   public getProducts(
     @Query() productsQuery: GetProductsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
-    console.log(user);
     return this.productsService.findAll(productsQuery, user.sub);
   }
 
-  @Get(':id')
+  @Get('/:id')
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+    required: true,
+
+    example:
+      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Unable to process the request at the moment, please try later',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Product fetchedsuccessfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User or Product not found',
+  })
+  @ApiOperation({
+    summary: 'Get product by id and user id',
+  })
   public getProductById(
     @Param() getProductParamsDto: GetProductParamsDto,
     @ActiveUser() user: ActiveUserData,
@@ -50,6 +133,34 @@ export class ProductsController {
     return this.productsService.getProductById(getProductParamsDto, user.sub);
   }
   @Patch('/:id')
+  @ApiOperation({
+    summary: 'Update product by id and user id',
+  })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+    required: true,
+
+    example:
+      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Unable to process the request at the moment, please try later',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Product udpated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request, invalid request',
+  })
   public updateProduct(
     @Body() updateProductDto: PatchProductDto,
     @Param() getProductParamsDto: GetProductParamsDto,
@@ -63,6 +174,34 @@ export class ProductsController {
   }
 
   @Delete('/:id')
+  @ApiOperation({
+    summary: 'Delete product by id and user id',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+    required: true,
+
+    example:
+      ' Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Unable to process the request at the moment, please try later',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Product deleted successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Cannot delete this product because it has associated orders',
+  })
   public deleteProduct(
     @Param() getProductParamsDto: GetProductParamsDto,
     @ActiveUser() user: ActiveUserData,

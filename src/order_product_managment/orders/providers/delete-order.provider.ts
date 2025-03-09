@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   RequestTimeoutException,
@@ -37,7 +38,7 @@ export class DeleteOrderProvider {
     try {
       user = await this.usersService.findUserById(userId);
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -54,7 +55,7 @@ export class DeleteOrderProvider {
         where: { id: getOrderParamsDto.id, user: { id: user.id } },
       });
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -98,7 +99,7 @@ export class DeleteOrderProvider {
     try {
       user = await this.usersService.findUserById(userId);
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
@@ -115,7 +116,7 @@ export class DeleteOrderProvider {
         where: { id: getOrderParamsDto.id, user: { id: user.id } },
       });
     } catch {
-      throw new RequestTimeoutException(
+      throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',

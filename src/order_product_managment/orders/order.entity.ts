@@ -17,13 +17,13 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: false })
   customerName: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ type: 'varchar', length: 32, nullable: false })
   phoneNumber: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: false })
   address: string;
 
   @Column({
@@ -33,10 +33,10 @@ export class Order {
   })
   status: string;
 
-  @Column({ type: 'boolean', default: false })
-  isExternal: boolean;
+  @Column({ type: 'boolean', default: false, nullable: true })
+  isExternal?: boolean;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 256, nullable: true })
   externalTrackingId?: string;
 
   @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.order, {
