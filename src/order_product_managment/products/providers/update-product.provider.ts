@@ -1,11 +1,12 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 import { UsersService } from 'src/users/providers/users.service';
 import { EntityManager, Repository } from 'typeorm';
@@ -24,6 +25,8 @@ export class UpdateProductProvider {
 
     /**inject order product service */
     private readonly orderProductService: OrderProductService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   public async updateProduct(
     getProductParamsDto: GetProductParamsDto,
@@ -35,12 +38,15 @@ export class UpdateProductProvider {
     let totalOrderedQuantity = undefined;
     try {
       user = await this.usersService.findUserById(userId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch user: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }
@@ -51,7 +57,11 @@ export class UpdateProductProvider {
         where: { id: getProductParamsDto.id, user: { id: user.id } },
         relations: { orderProducts: true },
       });
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch product: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -61,6 +71,7 @@ export class UpdateProductProvider {
       );
     }
     if (!product) {
+      this.logger.warn(`Product not found for ID ${getProductParamsDto.id}`);
       throw new NotFoundException('Product not found');
     }
 
@@ -69,15 +80,18 @@ export class UpdateProductProvider {
       updateProductDto.quantity !== undefined &&
       updateProductDto.quantity <= 0
     ) {
+      this.logger.warn('Quantity must be greater than 0');
       throw new BadRequestException('Quantity must be greater than 0');
     }
     if (updateProductDto.price !== undefined && updateProductDto.price <= 0) {
+      this.logger.warn('Price must be greater than 0');
       throw new BadRequestException('Price must be greater than 0');
     }
     if (
       updateProductDto.discount !== undefined &&
       (updateProductDto.discount < 0 || updateProductDto.discount > 1)
     ) {
+      this.logger.warn('Discount must be between 0 and 1');
       throw new BadRequestException('Discount must be between 0 and 1');
     }
 
@@ -85,7 +99,11 @@ export class UpdateProductProvider {
     try {
       totalOrderedQuantity =
         await this.orderProductService.getTotalOrderedQuantity(product.id);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch total ordered quantity: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -100,6 +118,9 @@ export class UpdateProductProvider {
       updateProductDto.quantity !== undefined &&
       updateProductDto.quantity < totalOrderedQuantity
     ) {
+      this.logger.warn(
+        `Cannot decrease quantity below ${totalOrderedQuantity}`,
+      );
       throw new BadRequestException(
         `Cannot decrease quantity below ${totalOrderedQuantity} because this amount is currently ordered`,
       );
@@ -121,6 +142,7 @@ export class UpdateProductProvider {
     // 6. Ensure only allowed fields are updated
     for (const key of Object.keys(updateProductDto)) {
       if (!allowedFields.includes(key)) {
+        this.logger.warn(`Cannot update field: ${key}`);
         throw new BadRequestException(`Cannot update field: ${key}`);
       }
     }
@@ -129,8 +151,13 @@ export class UpdateProductProvider {
     Object.assign(product, updateProductDto);
     try {
       product = await this.productsRepository.save(product);
+      this.logger.log('Product updated successfully');
       return product;
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to update product: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -156,11 +183,13 @@ export class UpdateProductProvider {
       where: { id: product.id, user: { id: userId } },
     });
     if (!existingProduct) {
+      this.logger.warn(`Product with ID ${product.id} not found`);
       throw new NotFoundException(`Product with ID ${product.id} not found`);
     }
 
     // Validate quantity
     if (product.quantity < 0) {
+      this.logger.warn(`Product ${product.id} quantity cannot be negative`);
       throw new BadRequestException(
         `Product ${product.id} quantity cannot be negative`,
       );

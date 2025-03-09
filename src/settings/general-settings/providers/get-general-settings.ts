@@ -61,6 +61,7 @@ export class GetGeneralSettingsProvider {
         description: 'error finding the user',
       });
     }
+    this.logger.log(`General Settings found for user ID ${userId}`);
     return generalSettings;
   }
 }

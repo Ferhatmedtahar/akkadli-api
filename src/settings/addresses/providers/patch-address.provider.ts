@@ -95,6 +95,7 @@ export class PatchAddressProvider {
         },
       );
     }
+    this.logger.log(`Address updated successfully for ID ${user.address.id} `);
     return updatedAddress;
   }
 }

@@ -68,6 +68,8 @@ export class GetGoogleUserProvider {
       this.logger.warn(`User not found for ID ${id} `);
       throw new NotFoundException('user Id does not exist');
     }
+
+    this.logger.log(`User found for ID ${id}`);
     return user;
   }
 }

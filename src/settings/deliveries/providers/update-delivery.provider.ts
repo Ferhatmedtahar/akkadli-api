@@ -1,11 +1,11 @@
 import {
+  Inject,
   Injectable,
   InternalServerErrorException,
-  Logger,
   NotFoundException,
-  RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { Delivery } from '../delivery.entity';
@@ -14,14 +14,14 @@ import { PatchDeliveryDto } from '../dtos/patchDeliveries.dto';
 
 @Injectable()
 export class UpdateDeliveryProvider {
-  private readonly logger = new Logger(UpdateDeliveryProvider.name);
-
   constructor(
     /**inject delivery repository */
     @InjectRepository(Delivery)
     private readonly deliveryRepository: Repository<Delivery>,
     /**inject user service */
     private readonly usersService: UsersService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
 
   public async updateDelivery(
@@ -33,9 +33,6 @@ export class UpdateDeliveryProvider {
     let user = undefined;
     try {
       user = await this.usersService.findUserById(userId);
-      this.logger.log('User fetched successfully for delivery update:', {
-        userId: userId,
-      });
     } catch (error) {
       this.logger.error(
         'Failed to fetch user: Database connection error',
@@ -60,9 +57,7 @@ export class UpdateDeliveryProvider {
       delivery = await this.deliveryRepository.findOne({
         where: { id: getDeliveryParamsDto.id, user: { id: user.id } },
       });
-      this.logger.log('Delivery found for update:', {
-        deliveryId: getDeliveryParamsDto.id,
-      });
+      this.logger.log(`Delivery found for update:${delivery.id}`);
     } catch (error) {
       this.logger.error(
         'Failed to find delivery: Database error',
@@ -75,10 +70,7 @@ export class UpdateDeliveryProvider {
     }
 
     if (!delivery) {
-      this.logger.warn('Delivery not found or not owned by user:', {
-        deliveryId: getDeliveryParamsDto.id,
-        userId: user.id,
-      });
+      this.logger.warn(`Delivery not found or not owned by user: ${userId}`);
       throw new NotFoundException('Delivery not found', {
         description: 'Delivery does not exist or does not belong to the user',
       });
@@ -91,9 +83,7 @@ export class UpdateDeliveryProvider {
       delivery.apiToken = patchDeliveryDto.apiToken ?? delivery.apiToken;
 
       const updatedDelivery = await this.deliveryRepository.save(delivery);
-      this.logger.log('Delivery updated successfully:', {
-        deliveryId: updatedDelivery.id,
-      });
+      this.logger.log(`Delivery updated successfully:${delivery.id}`);
       return updatedDelivery;
     } catch (error) {
       this.logger.error(

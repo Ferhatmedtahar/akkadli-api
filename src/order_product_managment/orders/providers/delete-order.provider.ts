@@ -1,14 +1,12 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  Param,
-  RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
-import { ProductsService } from 'src/order_product_managment/products/providers/products.service';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { GetOrderParamsDto } from '../dtos/getOrderParams.dto';
@@ -23,10 +21,8 @@ export class DeleteOrderProvider {
     private orderRepository: Repository<Order>,
     /**inject user service */
     private readonly usersService: UsersService,
-    /**inject product service */
-    private readonly productService: ProductsService,
-    /**inject order product service */
-    private readonly orderProductService: OrderProductService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
 
   public async deleteOrder(
@@ -37,12 +33,15 @@ export class DeleteOrderProvider {
     let order = undefined;
     try {
       user = await this.usersService.findUserById(userId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch user: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }
@@ -54,7 +53,11 @@ export class DeleteOrderProvider {
       order = await this.orderRepository.findOne({
         where: { id: getOrderParamsDto.id, user: { id: user.id } },
       });
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch order: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -72,12 +75,17 @@ export class DeleteOrderProvider {
     }
 
     if (order.status !== OrderStatus.PENDING) {
+      this.logger.warn('Only pending orders can be deleted.');
       throw new BadRequestException('Only pending orders can be deleted.');
     }
 
     try {
       await this.orderRepository.delete(order.id);
     } catch (error) {
+      this.logger.error(
+        'Failed to delete order: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new BadRequestException('error deleting the order.', {
         description: 'order could not be deleted.',
         cause: error,
@@ -98,12 +106,15 @@ export class DeleteOrderProvider {
     let order = undefined;
     try {
       user = await this.usersService.findUserById(userId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch user: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }
@@ -115,12 +126,15 @@ export class DeleteOrderProvider {
       order = await this.orderRepository.findOne({
         where: { id: getOrderParamsDto.id, user: { id: user.id } },
       });
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch order: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }
@@ -133,12 +147,17 @@ export class DeleteOrderProvider {
     }
 
     if (order.status !== OrderStatus.PENDING) {
+      this.logger.warn('Only pending orders can be deleted.');
       throw new BadRequestException('Only pending orders can be deleted.');
     }
 
     try {
       await this.orderRepository.softDelete(order.id);
     } catch (error) {
+      this.logger.error(
+        'Failed to soft delete order: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new BadRequestException('error deleting the order.', {
         description: 'order could not be deleted.',
         cause: error,

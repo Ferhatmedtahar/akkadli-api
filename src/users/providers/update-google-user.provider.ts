@@ -66,6 +66,7 @@ export class UpdateGoogleUserProvider {
         },
       );
     }
+    this.logger.log(`User updated for ID ${userData.sub}`);
     return user;
   }
 }

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   Param,
@@ -11,6 +12,7 @@ import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { Delivery } from '../delivery.entity';
 import { GetDeliveryParamsDto } from '../dtos/getDeliveryParams.dto';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 
 @Injectable()
 export class DeleteDeliveryProvider {
@@ -20,6 +22,8 @@ export class DeleteDeliveryProvider {
     private readonly deliveryRepository: Repository<Delivery>,
     /**inject user service */
     private readonly usersService: UsersService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   public async deleteDelivery(
     getDeliveryParamsDto: GetDeliveryParamsDto,
@@ -30,7 +34,11 @@ export class DeleteDeliveryProvider {
     let deletedDelivery = undefined;
     try {
       user = await this.usersService.findUserById(userId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch user: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -40,6 +48,7 @@ export class DeleteDeliveryProvider {
       );
     }
     if (!user) {
+      this.logger.warn(`User not found for ID ${userId}`);
       throw new UnauthorizedException('user not found', {
         description: 'error finding the user',
       });
@@ -50,7 +59,11 @@ export class DeleteDeliveryProvider {
         id: getDeliveryParamsDto.id,
         user: { id: user.id },
       });
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to find delivery: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -61,18 +74,22 @@ export class DeleteDeliveryProvider {
     }
 
     if (!deletedDelivery) {
+      this.logger.log('Delivery not found for deletion');
       throw new BadRequestException('delivery not found', {
         description: 'delivery not found in database',
       });
     }
     try {
-      await this.deliveryRepository.remove(deletedDelivery);
-    } catch {
+      await this.deliveryRepository.delete(deletedDelivery);
+    } catch (error) {
+      this.logger.error(
+        'Failed to delete delivery: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }

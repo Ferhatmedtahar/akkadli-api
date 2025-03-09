@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
@@ -16,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { CreateProductDto } from './dtos/createProduct.dto';
 import { GetProductParamsDto } from './dtos/getProductParams.dto';
 import { GetProductsDto } from './dtos/getProducts.dto';
@@ -28,6 +30,8 @@ export class ProductsController {
   constructor(
     /**inject products service */
     private readonly productsService: ProductsService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
 
   @Post()
@@ -56,8 +60,12 @@ export class ProductsController {
     @Body() createProductDto: CreateProductDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('create product', ProductsController.name, {
+      user: user.sub,
+    });
     return this.productsService.createProduct(createProductDto, user.sub);
   }
+
   // @Auth(authType.None)
   @Get()
   @ApiBearerAuth('access-token')
@@ -85,6 +93,9 @@ export class ProductsController {
     @Query() productsQuery: GetProductsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('get products', ProductsController.name, {
+      user: user.sub,
+    });
     return this.productsService.findAll(productsQuery, user.sub);
   }
 
@@ -114,6 +125,9 @@ export class ProductsController {
     @Param() getProductParamsDto: GetProductParamsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('get product by id', ProductsController.name, {
+      user: user.sub,
+    });
     return this.productsService.getProductById(getProductParamsDto, user.sub);
   }
   @Patch('/:id')
@@ -143,6 +157,10 @@ export class ProductsController {
     @Param() getProductParamsDto: GetProductParamsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('update product by id', ProductsController.name, {
+      user: user.sub,
+    });
+
     return this.productsService.updateProduct(
       getProductParamsDto,
       updateProductDto,
@@ -176,6 +194,10 @@ export class ProductsController {
     @Param() getProductParamsDto: GetProductParamsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('delete product by id', ProductsController.name, {
+      user: user.sub,
+    });
+
     return this.productsService.deleteProduct(getProductParamsDto, user.sub);
   }
 }

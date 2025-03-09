@@ -1,17 +1,17 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { OrderProduct } from 'src/order_product_managment/order-product/order-product.entity';
 import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 import { Product } from 'src/order_product_managment/products/product.entity';
 import { ProductsService } from 'src/order_product_managment/products/providers/products.service';
 import { User } from 'src/users/user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { GetOrderParamsDto } from '../dtos/getOrderParams.dto';
 import { PatchOrderDto } from '../dtos/patchOrder.dto';
 import { OrderStatus } from '../enums/orderStatus.enum';
@@ -19,14 +19,15 @@ import { Order } from '../order.entity';
 
 @Injectable()
 export class UpdateOrderProvider {
-  private readonly logger = new Logger(UpdateOrderProvider.name);
-
   constructor(
-    @InjectRepository(Order)
-    private orderRepository: Repository<Order>,
+    /**inject product service */
     private readonly productService: ProductsService,
+    /**inject order product service */
     private readonly orderProductService: OrderProductService,
-    private readonly dataSource: DataSource, // Inject DataSource for transactions
+    /**inject data source */
+    private readonly dataSource: DataSource,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
 
   public async updateOrder(
@@ -40,12 +41,10 @@ export class UpdateOrderProvider {
 
     try {
       let user: User;
+      let order: Order;
       try {
         user = await queryRunner.manager.findOne(User, {
           where: { id: userId },
-        });
-        this.logger.log('User fetched successfully for order update:', {
-          userId: userId,
         });
       } catch (error) {
         this.logger.error(
@@ -65,14 +64,10 @@ export class UpdateOrderProvider {
         });
       }
 
-      let order: Order;
       try {
         order = await queryRunner.manager.findOne(Order, {
           where: { id: getOrderParamsDto.id, user: { id: user.id } },
           relations: { orderProducts: true },
-        });
-        this.logger.log('Order fetched successfully for update:', {
-          orderId: getOrderParamsDto.id,
         });
       } catch (error) {
         this.logger.error(
@@ -86,10 +81,9 @@ export class UpdateOrderProvider {
       }
 
       if (!order) {
-        this.logger.warn('Order not found or not owned by user:', {
-          orderId: getOrderParamsDto.id,
-          userId: user.id,
-        });
+        this.logger.warn(
+          `Order not found or not owned by user ${getOrderParamsDto.id}`,
+        );
         throw new NotFoundException(
           `Order with ID ${getOrderParamsDto.id} not found`,
           {
@@ -99,10 +93,9 @@ export class UpdateOrderProvider {
       }
 
       if (order.status !== OrderStatus.PENDING) {
-        this.logger.warn('Order status prevents update:', {
-          orderId: getOrderParamsDto.id,
-          status: order.status,
-        });
+        this.logger
+          .warn(`Order status prevents update for ID ${getOrderParamsDto.id} 
+        with status ${order.status} to ${patchOrderDto.status}`);
         throw new BadRequestException('Only pending orders can be updated');
       }
 
@@ -122,9 +115,6 @@ export class UpdateOrderProvider {
           existingOrderProducts = await queryRunner.manager.find(OrderProduct, {
             where: { order: { id: getOrderParamsDto.id } },
             relations: ['product'], // Ensure product relation is loaded
-          });
-          this.logger.log('Existing OrderProducts fetched:', {
-            count: existingOrderProducts.length,
           });
         } catch (error) {
           this.logger.error(
@@ -156,6 +146,7 @@ export class UpdateOrderProvider {
         for (const op of productsToRemove) {
           const product = op.product; // Already loaded via relations
           if (!product) {
+            this.logger.warn(`Product with ID ${op.product.id} not found`);
             throw new NotFoundException(
               `Product with ID ${op.product.id} not found`,
             );
@@ -168,9 +159,6 @@ export class UpdateOrderProvider {
               userId,
               queryRunner.manager,
             );
-            this.logger.log('Product quantity reverted successfully:', {
-              productId: product.id,
-            });
           } catch (error) {
             this.logger.error(
               'Failed to revert product quantity: Database error',
@@ -184,9 +172,6 @@ export class UpdateOrderProvider {
 
           try {
             await queryRunner.manager.remove(op);
-            this.logger.log('OrderProduct removed successfully:', {
-              orderProductId: op.id,
-            });
           } catch (error) {
             this.logger.error(
               'Failed to remove OrderProduct: Database error',
@@ -206,9 +191,6 @@ export class UpdateOrderProvider {
             product = await queryRunner.manager.findOne(Product, {
               where: { id: p.productId },
             });
-            this.logger.log('Product fetched for order update:', {
-              productId: p.productId,
-            });
           } catch (error) {
             this.logger.error(
               'Failed to fetch product: Database error',
@@ -221,7 +203,7 @@ export class UpdateOrderProvider {
           }
 
           if (!product) {
-            this.logger.warn('Product not found:', { productId: p.productId });
+            this.logger.warn(`Product not found:${p.productId}`);
             throw new NotFoundException(
               `Product with ID ${p.productId} not found`,
               {
@@ -237,23 +219,13 @@ export class UpdateOrderProvider {
           if (existingOrderProduct) {
             // Update existing OrderProduct
             const quantityDiff = p.quantity - existingOrderProduct.quantity;
-            this.logger.log('Updating existing OrderProduct:', {
-              orderProductId: existingOrderProduct.id,
-              currentQuantity: existingOrderProduct.quantity,
-              newQuantity: p.quantity,
-              quantityDiff: quantityDiff,
-              productId: p.productId,
-            });
-
             if (quantityDiff !== 0) {
               if (quantityDiff > 0) {
                 // Increasing quantity
                 if (quantityDiff > product.quantity) {
-                  this.logger.warn('Insufficient stock for product update:', {
-                    productId: p.productId,
-                    requested: quantityDiff,
-                    available: product.quantity,
-                  });
+                  this.logger.warn(
+                    `Insufficient stock for product update: ${`${product.quantity} available but requested ${quantityDiff} for product ${p.productId}`}`,
+                  );
                   throw new BadRequestException(
                     `Insufficient stock for product ${p.productId} (${product.quantity} available)`,
                   );
@@ -266,11 +238,7 @@ export class UpdateOrderProvider {
                   );
                 }
               }
-              this.logger.log('Product before update:', {
-                productId: product.id,
-                quantity: product.quantity,
-                totalProductsSold: product.totalProductsSold,
-              });
+
               product.quantity -= quantityDiff; // Adjust stock (positive or negative diff)
               product.totalProductsSold += quantityDiff; // Adjust sold count
               const discountedPrice = product.discount
@@ -282,11 +250,7 @@ export class UpdateOrderProvider {
                   userId,
                   queryRunner.manager,
                 );
-                this.logger.log('Product quantity updated successfully:', {
-                  productId: product.id,
-                  quantity: product.quantity,
-                  totalProductsSold: product.totalProductsSold,
-                });
+                this.logger.log('Product quantity updated successfully');
               } catch (error) {
                 this.logger.error(
                   'Failed to update product quantity: Database error',
@@ -300,11 +264,13 @@ export class UpdateOrderProvider {
 
               existingOrderProduct.quantity = p.quantity;
               existingOrderProduct.priceAtPurchase = discountedPrice; // Recalculate priceAtPurchase
-              this.logger.log('OrderProduct before save:', {
-                orderProductId: existingOrderProduct.id,
-                quantity: existingOrderProduct.quantity,
-                priceAtPurchase: existingOrderProduct.priceAtPurchase,
-              });
+              this.logger.log(
+                `OrderProduct before save: ${{
+                  orderProductId: existingOrderProduct.id,
+                  quantity: existingOrderProduct.quantity,
+                  priceAtPurchase: existingOrderProduct.priceAtPurchase,
+                }}`,
+              );
               try {
                 const updatedOrderProduct = await queryRunner.manager.merge(
                   OrderProduct,
@@ -316,11 +282,7 @@ export class UpdateOrderProvider {
                 );
                 const savedOrderProduct =
                   await queryRunner.manager.save(updatedOrderProduct);
-                this.logger.log('OrderProduct updated successfully:', {
-                  orderProductId: savedOrderProduct.id,
-                  quantity: savedOrderProduct.quantity,
-                  priceAtPurchase: savedOrderProduct.priceAtPurchase,
-                });
+                this.logger.log(`OrderProduct updated successfully`);
               } catch (error) {
                 this.logger.error(
                   'Failed to update OrderProduct: Database error',
@@ -337,14 +299,6 @@ export class UpdateOrderProvider {
                 order = await queryRunner.manager.findOne(Order, {
                   where: { id: getOrderParamsDto.id },
                   relations: { orderProducts: true },
-                });
-                this.logger.log('Order reloaded with updated orderProducts:', {
-                  orderId: order.id,
-                  orderProducts: order.orderProducts.map((op) => ({
-                    id: op.id,
-                    quantity: op.quantity,
-                    priceAtPurchase: op.priceAtPurchase,
-                  })),
                 });
               } catch (error) {
                 this.logger.error(
@@ -363,11 +317,7 @@ export class UpdateOrderProvider {
           } else {
             // Add new OrderProduct
             if (p.quantity > product.quantity) {
-              this.logger.warn('Insufficient stock for new product:', {
-                productId: p.productId,
-                requested: p.quantity,
-                available: product.quantity,
-              });
+              this.logger.warn('Insufficient stock for new product');
               throw new BadRequestException(
                 `Insufficient stock for product ${p.productId} (${product.quantity} available)`,
               );
@@ -381,8 +331,7 @@ export class UpdateOrderProvider {
                 queryRunner.manager,
               );
               this.logger.log(
-                'Product quantity reduced for new OrderProduct:',
-                { productId: product.id },
+                'Product quantity reduced for new OrderProduct successfully',
               );
             } catch (error) {
               this.logger.error(
@@ -404,9 +353,9 @@ export class UpdateOrderProvider {
               });
             try {
               await queryRunner.manager.save(orderProductToCreate);
-              this.logger.log('New OrderProduct created successfully:', {
-                orderProductId: orderProductToCreate.id,
-              });
+              this.logger.log(
+                `New OrderProduct created successfully ${orderProductToCreate.id}`,
+              );
             } catch (error) {
               this.logger.error(
                 'Failed to create new OrderProduct: Database error',
@@ -424,11 +373,9 @@ export class UpdateOrderProvider {
       // Step 5: Save the updated order
       try {
         const savedOrder = await queryRunner.manager.save(order);
-        this.logger.log('Order updated successfully:', {
-          orderId: savedOrder.id,
-        });
+        this.logger.log('Order updated successfully:');
         await queryRunner.commitTransaction();
-        return { message: 'Order updated successfully', order: savedOrder };
+        return savedOrder;
       } catch (error) {
         this.logger.error(
           'Failed to save updated order: Database error',

@@ -108,6 +108,7 @@ export class PatchGeneralSettings {
         description: 'error updating the general settings',
       });
     }
+    this.logger.log(`General settings updated for ID ${userId} `);
     return savedGeneralSettings;
   }
 }

@@ -1,15 +1,15 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
 import { Product } from 'src/order_product_managment/products/product.entity';
 import { ProductsService } from 'src/order_product_managment/products/providers/products.service';
-import { UsersService } from 'src/users/providers/users.service';
 import { User } from 'src/users/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { CreateOrderDto } from '../dtos/createOrder.dto';
@@ -18,15 +18,18 @@ import { Order } from '../order.entity';
 
 @Injectable()
 export class CreateOrderProvider {
-  private readonly logger = new Logger(CreateOrderProvider.name);
-
   constructor(
+    /**inject order repository */
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
+    /**inject product service */
     private readonly productService: ProductsService,
+    /**inject order product service */
     private readonly orderProductService: OrderProductService,
-    private readonly usersService: UsersService,
+    /**inject data source */
     private readonly dataSource: DataSource,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
 
   public async createOrder(
@@ -46,9 +49,6 @@ export class CreateOrderProvider {
       try {
         user = await queryRunner.manager.findOne(User, {
           where: { id: userId },
-        });
-        this.logger.log('User fetched successfully for order creation:', {
-          userId: userId,
         });
       } catch (error) {
         this.logger.error(
@@ -79,17 +79,14 @@ export class CreateOrderProvider {
       });
 
       const savedOrder = await queryRunner.manager.save(order);
-      this.logger.log('Order created successfully:', {
-        orderId: savedOrder.id,
-      });
+      this.logger.log(`Order created successfully with ID ${savedOrder.id}`);
 
       const orderProducts = [];
       for (const p of createOrderDto.products) {
         if (p.quantity == null || p.quantity === undefined || p.quantity <= 0) {
-          this.logger.warn('Invalid or missing quantity for product:', {
-            productId: p.productId,
-            quantity: p.quantity,
-          });
+          this.logger.warn(
+            `Invalid or missing quantity for product ${p.productId}`,
+          );
           throw new BadRequestException(
             `Invalid or missing quantity for product ${p.productId}`,
           );
@@ -100,9 +97,7 @@ export class CreateOrderProvider {
           product = await queryRunner.manager.findOne(Product, {
             where: { id: p.productId, user: { id: user.id } },
           });
-          this.logger.log('Product fetched for order:', {
-            productId: p.productId,
-          });
+          this.logger.log(`Product ${p.productId}fetched for order creation`);
         } catch (error) {
           this.logger.error(
             'Failed to fetch product: Database error',
@@ -115,7 +110,7 @@ export class CreateOrderProvider {
         }
 
         if (!product) {
-          this.logger.warn('Product not found:', { productId: p.productId });
+          this.logger.warn(`Product ${p.productId}not found`);
           throw new NotFoundException(
             `Product with id ${p.productId} not found`,
             {
@@ -129,11 +124,10 @@ export class CreateOrderProvider {
           : product.price;
 
         if (p.quantity > product.quantity) {
-          this.logger.warn('Insufficient stock for product:', {
-            productId: p.productId,
-            requested: p.quantity,
-            available: product.quantity,
-          });
+          this.logger.warn(
+            `Insufficient stock for product ${p.productId}, requested: ${p.quantity}, available: ${product.quantity}`,
+          );
+
           throw new BadRequestException(
             `Product with id ${p.productId} not available (only ${product.quantity} in stock)`,
             {
@@ -150,9 +144,9 @@ export class CreateOrderProvider {
             userId,
             queryRunner.manager,
           );
-          this.logger.log('Product updated successfully for order:', {
-            productId: product.id,
-          });
+          this.logger.log(
+            `Product ${product.id} updated successfully for order`,
+          );
         } catch (error) {
           this.logger.error(
             'Failed to update product: Database error',
@@ -172,25 +166,12 @@ export class CreateOrderProvider {
             priceAtPurchase: discountedPrice,
           });
 
-        this.logger.log('OrderProduct created:', {
-          orderId: orderProduct.order.id,
-          productId: orderProduct.product.id,
-          quantity: orderProduct.quantity,
-          priceAtPurchase: orderProduct.priceAtPurchase,
-        });
+        this.logger
+          .log(`OrderProduct created successfully for order ${orderProduct.order.id}
+            product ${orderProduct.product.id} with quantity ${orderProduct.quantity} and price ${orderProduct.priceAtPurchase}`);
 
         orderProducts.push(orderProduct);
       }
-
-      this.logger.log(
-        'OrderProducts before save:',
-        orderProducts.map((p) => ({
-          orderId: p.order.id,
-          productId: p.product.id,
-          quantity: p.quantity,
-          priceAtPurchase: p.priceAtPurchase,
-        })),
-      );
 
       try {
         const savedOrderProducts =
@@ -199,20 +180,14 @@ export class CreateOrderProvider {
             queryRunner.manager,
           );
         savedOrder.orderProducts = savedOrderProducts; // Update with saved entities
-        this.logger.log('OrderProducts saved successfully:', {
-          count: savedOrderProducts.length,
-        });
+        this.logger
+          .log(`OrderProducts saved successfully for order ${savedOrder.id}
+          savedOrderProducts.length: ${savedOrderProducts.length}`);
       } catch (error) {
-        this.logger.error('Failed to save OrderProducts: Database error', {
-          error: error.message,
-          stack: error.stack || 'No stack trace available',
-          orderId: savedOrder.id,
-          orderProducts: orderProducts.map((p) => ({
-            productId: p.product.id,
-            quantity: p.quantity,
-            priceAtPurchase: p.priceAtPurchase,
-          })),
-        });
+        this.logger.error(
+          'Failed to save order products: Database error',
+          error.stack || error.message || 'No stack trace available',
+        );
         throw new InternalServerErrorException(
           'Failed to save order products, please try again later',
           { description: 'Error saving order products to the database' },
@@ -220,9 +195,9 @@ export class CreateOrderProvider {
       }
 
       await queryRunner.commitTransaction();
-      this.logger.log('Transaction committed successfully for order:', {
-        orderId: savedOrder.id,
-      });
+      this.logger.log(
+        `Transaction committed successfully for order ${savedOrder.id}`,
+      );
 
       return savedOrder;
     } catch (error) {

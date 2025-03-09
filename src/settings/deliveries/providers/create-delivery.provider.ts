@@ -1,12 +1,11 @@
 import {
   BadRequestException,
-  Body,
+  Inject,
   Injectable,
   InternalServerErrorException,
-  Logger,
-  RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { Delivery } from '../delivery.entity';
@@ -14,13 +13,14 @@ import { CreateDeliveryDto } from '../dtos/createDeliveries.dto';
 
 @Injectable()
 export class CreateDeliveryProvider {
-  private readonly logger = new Logger(CreateDeliveryProvider.name);
   constructor(
     /**inject delivery repository */
     @InjectRepository(Delivery)
     private readonly deliveryRepository: Repository<Delivery>,
     /**inject user service */
     private readonly usersService: UsersService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   public async createDelivery(
     createDeliveryDto: CreateDeliveryDto,
@@ -35,7 +35,11 @@ export class CreateDeliveryProvider {
       existingDelivery = await this.deliveryRepository.findOneBy({
         apiId: createDeliveryDto.apiId,
       });
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to find delivery: Database error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -45,13 +49,18 @@ export class CreateDeliveryProvider {
     }
 
     if (existingDelivery) {
+      this.logger.warn('Delivery already exists');
       throw new BadRequestException('delivery already exists', {
         description: 'delivery already exists in database',
       });
     }
     try {
       user = await this.usersService.findUserById(userId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to find user: Database error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -60,6 +69,7 @@ export class CreateDeliveryProvider {
       );
     }
     if (!user) {
+      this.logger.warn(`User not found for ID ${userId}`);
       throw new BadRequestException('user not found', {
         description: 'user does not exist in database',
       });
@@ -73,7 +83,11 @@ export class CreateDeliveryProvider {
     //save and return the delivery
     try {
       newDelivery = await this.deliveryRepository.save(newDelivery);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to create delivery: Database error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -82,10 +96,12 @@ export class CreateDeliveryProvider {
       );
     }
     if (!newDelivery) {
+      this.logger.warn('Delivery not created');
       throw new BadRequestException('delivery not created', {
         description: 'error creating delivery',
       });
     }
+    this.logger.log('Delivery created successfully');
     return newDelivery;
   }
 }

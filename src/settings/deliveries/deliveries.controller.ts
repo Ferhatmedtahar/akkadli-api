@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpStatus,
+  Inject,
   Param,
   Patch,
   Post,
@@ -18,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { CreateDeliveryDto } from './dtos/createDeliveries.dto';
 import { GetDeliveriesDto } from './dtos/getDeliveries.dto';
 import { GetDeliveryParamsDto } from './dtos/getDeliveryParams.dto';
@@ -29,6 +31,8 @@ export class DeliveriesController {
   constructor(
     /**inject deliveries service */
     private readonly deliveriesService: DeliveryService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
 
   @Post()
@@ -59,6 +63,9 @@ export class DeliveriesController {
     @Body() createDeliveryDto: CreateDeliveryDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('create delivery', DeliveriesController.name, {
+      user: user.sub,
+    });
     return this.deliveriesService.createDelivery(createDeliveryDto, user.sub);
   }
 
@@ -84,6 +91,13 @@ export class DeliveriesController {
     @Query() deliveriesQuery: GetDeliveriesDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log(
+      'find all deliveries by user id',
+      DeliveriesController.name,
+      {
+        user: user.sub,
+      },
+    );
     return this.deliveriesService.findAllByUserId(deliveriesQuery, user.sub);
   }
 
@@ -120,6 +134,9 @@ export class DeliveriesController {
     @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('find one delivery', DeliveriesController.name, {
+      user: user.sub,
+    });
     return this.deliveriesService.findOneById(getDeliveryParamsDto, user.sub);
   }
 
@@ -157,6 +174,9 @@ export class DeliveriesController {
     @Body() patchDeliveryDto: PatchDeliveryDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('update one delivery', DeliveriesController.name, {
+      user: user.sub,
+    });
     return this.deliveriesService.updateDelivery(
       getDeliveryParamsDto,
       patchDeliveryDto,
@@ -196,6 +216,9 @@ export class DeliveriesController {
     @Param() getDeliveryParamsDto: GetDeliveryParamsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('delete one delivery', DeliveriesController.name, {
+      user: user.sub,
+    });
     return this.deliveriesService.deleteDelivery(
       getDeliveryParamsDto,
       user.sub,

@@ -1,18 +1,18 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
-  Param,
-  RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Paginated } from 'src/common/pagination/interfaces/paginated.interface';
 import { PaginationService } from 'src/common/pagination/pagination.service';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { GetOrderParamsDto } from '../dtos/getOrderParams.dto';
 import { GetOrdersDto } from '../dtos/getOrders.dto';
 import { Order } from '../order.entity';
-import { Paginated } from 'src/common/pagination/interfaces/paginated.interface';
 
 @Injectable()
 export class GetOrderProvider {
@@ -24,6 +24,8 @@ export class GetOrderProvider {
     private readonly usersService: UsersService,
     /**inject pagination service */
     private readonly paginationService: PaginationService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
 
   public async getOrder(getOrderParamsDto: GetOrderParamsDto, userId: number) {
@@ -31,12 +33,15 @@ export class GetOrderProvider {
     let order = undefined;
     try {
       user = await this.usersService.findUserById(userId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch user: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }
@@ -51,7 +56,8 @@ export class GetOrderProvider {
         where: { id: getOrderParamsDto.id, user: { id: user.id } },
         relations: { orderProducts: { product: true } },
       });
-    } catch {
+      this.logger.log(`Order with id ${getOrderParamsDto.id} was found`);
+    } catch (error) {
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -77,12 +83,15 @@ export class GetOrderProvider {
     let user = undefined;
     try {
       user = await this.usersService.findUserById(userId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch user: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }
@@ -103,13 +112,13 @@ export class GetOrderProvider {
         where,
         relations,
       );
+      this.logger.log(`${orders.data.length} Orders was found `);
       return orders;
     } catch {
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }

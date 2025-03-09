@@ -66,7 +66,7 @@ export class GetAddressProvider {
         description: 'error finding the user',
       });
     }
-
+    this.logger.log(`Address found for ID ${userId} `);
     return address;
   }
 }

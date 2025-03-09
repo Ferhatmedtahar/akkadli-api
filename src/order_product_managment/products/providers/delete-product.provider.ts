@@ -1,17 +1,15 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
-  Param,
-  RequestTimeoutException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderProductService } from 'src/order_product_managment/order-product/providers/order-product.service';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { GetProductParamsDto } from '../dtos/getProductParams.dto';
 import { Product } from '../product.entity';
-import { UpdateProductProvider } from './update-product.provider';
 
 @Injectable()
 export class DeleteProductProvider {
@@ -21,10 +19,8 @@ export class DeleteProductProvider {
     /**inject products repository */
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
-    /**inject order product service */
-    private readonly orderProductService: OrderProductService,
-    /**inject update product provider */
-    private readonly updateProductProvider: UpdateProductProvider,
+    /**inject logger service*/
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
 
   public async deleteProduct(
@@ -36,12 +32,15 @@ export class DeleteProductProvider {
 
     try {
       user = await this.usersService.findUserById(userId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch user: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }
@@ -54,21 +53,28 @@ export class DeleteProductProvider {
           orderProducts: true,
         },
       });
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch product: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }
 
     if (!product) {
+      this.logger.warn(`Product not found for ID ${getProductParamsDto.id}`);
       throw new BadRequestException('Product not found');
     }
 
     if (product.orderProducts.length > 0) {
+      this.logger.warn(
+        `Cannot delete this product ${getProductParamsDto.id} because it has associated orders.`,
+      );
       throw new BadRequestException(
         'Cannot delete this product because it has associated orders.',
       );
@@ -77,7 +83,11 @@ export class DeleteProductProvider {
     try {
       await this.productsRepository.delete(product.id);
       return { message: 'product deleted', deleted: true, id: product.id };
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to delete product: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {

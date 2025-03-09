@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
@@ -16,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { CreateOrderDto } from './dtos/createOrder.dto';
 import { GetOrderParamsDto } from './dtos/getOrderParams.dto';
 import { GetOrdersDto } from './dtos/getOrders.dto';
@@ -28,6 +30,8 @@ export class OrdersController {
   constructor(
     /**inject order service */
     private readonly orderService: OrdersService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   @Post()
   @ApiOperation({
@@ -58,6 +62,7 @@ export class OrdersController {
     @Body() createOrderDto: CreateOrderDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('create order', OrdersController.name, { user: user.sub });
     return this.orderService.createOrder(createOrderDto, user.sub);
   }
 
@@ -83,6 +88,10 @@ export class OrdersController {
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('get order by id ', OrdersController.name, {
+      user: user.sub,
+    });
+
     return this.orderService.getOrderbyId(getOrderParamsDto, user.sub);
   }
 
@@ -112,6 +121,9 @@ export class OrdersController {
     @Query() ordersQuery: GetOrdersDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('get all orders ', OrdersController.name, {
+      user: user.sub,
+    });
     return this.orderService.getAllOrders(ordersQuery, user.sub);
   }
 
@@ -143,6 +155,9 @@ export class OrdersController {
     @Body() updateOrderDto: PatchOrderDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('update order by id ', OrdersController.name, {
+      user: user.sub,
+    });
     return this.orderService.updateOrder(
       getOrderParamsDto,
       updateOrderDto,
@@ -180,6 +195,9 @@ export class OrdersController {
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('delete order by id ', OrdersController.name, {
+      user: user.sub,
+    });
     return this.orderService.deleteOrder(getOrderParamsDto, user.sub);
   }
 
@@ -213,6 +231,9 @@ export class OrdersController {
     @Param() getOrderParamsDto: GetOrderParamsDto,
     @ActiveUser() user: ActiveUserData,
   ) {
+    this.logger.log('soft delete order by id ', OrdersController.name, {
+      user: user.sub,
+    });
     return this.orderService.softDeleteOrder(getOrderParamsDto, user.sub);
   }
 }

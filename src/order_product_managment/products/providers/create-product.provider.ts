@@ -1,28 +1,28 @@
 import {
   BadRequestException,
-  Body,
+  Inject,
   Injectable,
   InternalServerErrorException,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 import { UsersService } from 'src/users/providers/users.service';
+import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from '../dtos/createProduct.dto';
 import { Product } from '../product.entity';
-import { User } from 'src/users/user.entity';
 
 @Injectable()
 export class CreateProductProvider {
-  private readonly logger = new Logger(CreateProductProvider.name);
-
   constructor(
     /**inject user service */
     private readonly usersService: UsersService,
     /**inject products repository */
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
 
   public async createProductProvider(
@@ -35,9 +35,6 @@ export class CreateProductProvider {
     // 1. Find user from database based on the author ID
     try {
       user = await this.usersService.findUserById(userId);
-      this.logger.log('User fetched successfully for product creation:', {
-        userId: user.id,
-      });
     } catch (error) {
       this.logger.error(
         'Failed to fetch user: Database connection error',
@@ -58,25 +55,21 @@ export class CreateProductProvider {
 
     // 2. Validate input
     if (createProductDto.quantity <= 0) {
-      this.logger.warn('Invalid quantity for product:', {
-        quantity: createProductDto.quantity,
-      });
+      this.logger.warn(
+        `Invalid quantity : ${createProductDto.quantity} for a product `,
+      );
       throw new BadRequestException('Quantity must be greater than 0');
     }
     if (createProductDto.price <= 0) {
-      this.logger.warn('Invalid price for product:', {
-        price: createProductDto.price,
-      });
+      this.logger.warn(`Invalid price ${createProductDto.price}for a product`);
       throw new BadRequestException('Price must be greater than 0');
     }
     if (createProductDto.discount < 0 || createProductDto.discount > 1) {
-      this.logger.warn('Invalid discount for product:', {
-        discount: createProductDto.discount,
-      });
+      this.logger.warn(
+        `Invalid discount ${createProductDto.discount}for a product`,
+      );
       throw new BadRequestException('Discount must be between 0 and 1');
     }
-
-    this.logger.log('Creating product with DTO:', createProductDto);
 
     // 3. Create and save product
     try {
@@ -88,15 +81,12 @@ export class CreateProductProvider {
       });
 
       product = await this.productsRepository.save(product);
-      this.logger.log('Product created successfully:', {
-        productId: product.id,
-      });
+      this.logger.log(`Product created successfully`);
     } catch (error) {
-      this.logger.error('Failed to create product: Database error', {
-        error: error.message,
-        stack: error.stack || 'No stack trace available',
-        productDto: createProductDto,
-      });
+      this.logger.error(
+        'Failed to create product: Database error',
+        error.stack || error.message || 'No stack trace available',
+      );
       if (error instanceof Error && 'constraint' in error) {
         throw new BadRequestException(
           `Database constraint violation: ${error.message}`,

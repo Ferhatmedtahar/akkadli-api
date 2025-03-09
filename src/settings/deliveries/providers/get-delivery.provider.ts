@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   RequestTimeoutException,
@@ -12,6 +13,7 @@ import { Repository } from 'typeorm';
 import { Delivery } from '../delivery.entity';
 import { GetDeliveriesDto } from '../dtos/getDeliveries.dto';
 import { GetDeliveryParamsDto } from '../dtos/getDeliveryParams.dto';
+import { ILogger } from 'src/logger/interfaces/logger.interface';
 
 @Injectable()
 export class GetDeliveryProvider {
@@ -23,6 +25,8 @@ export class GetDeliveryProvider {
     private readonly usersService: UsersService,
     /**inject pagination service */
     private readonly paginationService: PaginationService,
+    /**inject logger service */
+    @Inject('ILogger') private readonly logger: ILogger,
   ) {}
   public async findOneById(
     getDeliveryParamsDto: GetDeliveryParamsDto,
@@ -33,7 +37,11 @@ export class GetDeliveryProvider {
     let delivery = undefined;
     try {
       user = await this.usersService.findUserById(userId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch user: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -43,6 +51,7 @@ export class GetDeliveryProvider {
       );
     }
     if (!user) {
+      this.logger.warn(`User not found for ID ${userId}`);
       throw new BadRequestException('user not found', {
         description: 'user not found in the database',
       });
@@ -52,7 +61,11 @@ export class GetDeliveryProvider {
       delivery = await this.deliveryRepository.findOne({
         where: { id: getDeliveryParamsDto.id, user: { id: user.id } },
       });
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch delivery: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
@@ -63,10 +76,12 @@ export class GetDeliveryProvider {
     }
 
     if (!delivery) {
+      this.logger.warn(`Delivery not found for ID ${getDeliveryParamsDto.id}`);
       throw new BadRequestException('Delivery not found', {
         description: 'Delivery does not exist in the database',
       });
     }
+    this.logger.log(`Delivery fetched successfully for user ID ${userId}`);
     return delivery;
   }
 
@@ -79,17 +94,22 @@ export class GetDeliveryProvider {
     let deliveries = undefined;
     try {
       user = await this.usersService.findUserById(userId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch user: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
+
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }
 
     if (!user) {
+      this.logger.warn(`User not found for ID ${userId}`);
       throw new BadRequestException('user not found', {
         description: 'user not found in the database',
       });
@@ -103,15 +123,16 @@ export class GetDeliveryProvider {
         this.deliveryRepository,
         where,
       );
-      // deliveries = await this.deliveryRepository.find({
-      //   where: { user: { id: user.id } },
-      // });
-    } catch {
+      this.logger.log(`Deliveries fetched successfully for user ID ${userId}`);
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch deliveries: Database connection error',
+        error.stack || error.message || 'No stack trace available',
+      );
       throw new InternalServerErrorException(
         'Unable to process the request at the moment, please try later',
         {
           description: 'error connecting to the database',
-          // cause: error,
         },
       );
     }
